@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الجلسة الاستكشافية المجانية | النذير — احجز جلستك</title>
+<meta name="description" content="احجز جلسة مجانية معي: أتعرف على عملك، وأفهم تحدياتك، وأضع معك حلاً عاماً وخارطة البدء.">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='50' fill='%23111111'/%3E%3Ctext x='50' y='70' font-size='54' text-anchor='middle' fill='%23E9B44C' font-family='Arial' font-weight='bold'%3E%D9%86%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<header class="nav" id="top"><div class="container nav-inner">
+<a href="index.html" class="logo"><span class="logo-mark">ن</span><span>النذير</span></a>
+<nav class="nav-links" id="navLinks"><a href="index.html">الرئيسية</a><a href="services.html">الخدمات</a><a href="projects.html">المشاريع</a><a href="about.html">من أنا</a><a href="faq.html">الأسئلة الشائعة</a><a href="contact.html">تواصل معي</a></nav>
+<div class="nav-actions"><a href="free-session.html" class="btn btn-primary btn-sm">جلسة مجانية</a><button class="menu-btn" id="menuBtn" aria-label="فتح القائمة" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
+</div></header>
+<main>
+<section class="page-hero"><div class="container">
+<div class="breadcrumb"><a href="index.html">الرئيسية</a> / <span>الجلسة المجانية</span></div>
+<span class="section-label">الجلسة الاستكشافية المجانية</span>
+<h1>ترغب في دمج الذكاء الاصطناعي في عملك ولا تعرف من أين تبدأ؟</h1>
+<p class="lead">احجز جلسة مجانية معي أتعرف فيها على طبيعة عملك، وأفهم التحديات والعمليات التي تواجهك، وأحدد معك أين يمكن للذكاء الاصطناعي والأتمتة أن يقدما قيمة حقيقية لعملك — وتخرج بحل عام وخارطة بدء واضحة.</p>
+</div></section>
+
+<section class="section"><div class="container split">
+<div>
+<h2 class="title-start">ماذا ستستفيد من الجلسة؟ سأحدد معك:</h2>
+<div style="display:grid;gap:10px;margin-top:14px">
+<div class="benefit reveal"><span class="check">✓</span><span>أهم المشكلات والمهام التي يمكن تحسينها في عملك أنت.</span></div>
+<div class="benefit reveal"><span class="check">✓</span><span>فرص استخدام الذكاء الاصطناعي داخل عملك بالتحديد.</span></div>
+<div class="benefit reveal"><span class="check">✓</span><span>العمليات التي يمكن أتمتتها فوراً لتوفير وقتك.</span></div>
+<div class="benefit reveal"><span class="check">✓</span><span>ما إذا كان مشروعك يحتاج إلى وكيل ذكاء اصطناعي أو نظاماً مخصصاً أو تكاملاً مع أنظمتك الحالية.</span></div>
+<div class="benefit reveal"><span class="check">✓</span><span>ما الخطوة الأنسب للبدء — بلا حشو ولا التزام.</span></div>
+</div>
+<div class="problem-card reveal" style="margin-top:16px"><h3>كيف تتم الجلسة؟</h3><p class="muted">مكالمة فيديو قصيرة (20–30 دقيقة). أحضّر لها بعد قراءة نموذجك بالأسفل، ثم أرسل لك ملخص الحل العام على واتساب.</p></div>
+</div>
+<div>
+<div class="form-card reveal">
+<h2 class="title-start" style="font-size:22px">نموذج حجز الجلسة المجانية</h2>
+<p class="muted" style="font-size:14px">املأ الحقول التالية وسأتواصل معك لتأكيد الموعد. النموذج مرتبط تلقائياً مع Google Form (فعّله من script.js).</p>
+<p id="servicePrefill" style="display:none;background:var(--gold-soft);border:1px solid var(--gold);border-radius:12px;padding:10px 14px;font-size:14px;margin-top:10px"></p>
+<form id="bookingForm" novalidate>
+<label for="fullName">الاسم الكامل *</label>
+<input type="text" id="fullName" name="name" placeholder="مثال: محمد عبدالله" required autocomplete="name">
+<label for="phone">رقم الهاتف أو واتساب *</label>
+<input type="tel" id="phone" name="phone" placeholder="مثال: 9665XXXXXXXX" required autocomplete="tel" dir="ltr" style="text-align:end">
+<label for="email">البريد الإلكتروني *</label>
+<input type="email" id="email" name="email" placeholder="you@email.com" required autocomplete="email" dir="ltr" style="text-align:end">
+<label for="serviceInterest">ما الخدمة التي تهمك؟ (اختياري)</label>
+<select id="serviceInterest" name="service">
+<option value="">اختر إن كنت تعرف…</option>
+<option>روبوتات المحادثة الذكية</option>
+<option>الوكلاء الصوتيون</option>
+<option>وكلاء الذكاء الاصطناعي</option>
+<option>أتمتة العمليات والمهام</option>
+<option>دمج الذكاء الاصطناعي</option>
+<option>حلول الذكاء الاصطناعي المخصصة</option>
+<option>تخصيص نماذج الذكاء الاصطناعي</option>
+<option>أنظمة الأعمال المدعومة بالذكاء الاصطناعي</option>
+<option>تطوير المواقع</option>
+<option>تطوير المتاجر الإلكترونية</option>
+<option>تطوير تطبيقات الهاتف</option>
+<option>تطوير أنظمة الشركات</option>
+<option>أنظمة ERP</option>
+<option>أنظمة CRM</option>
+<option>الأنظمة البرمجية المخصصة</option>
+<option>لست متأكداً — أحتاج مساعدتك</option>
+</select>
+<label for="workType">ما طبيعة عملك؟ *</label>
+<textarea id="workType" name="work" rows="3" placeholder="اكتب نبذة مختصرة عن نشاطك أو شركتك والخدمات التي تقدمها." required></textarea>
+<label for="problem">ما أكبر مشكلة تواجهها حالياً؟ *</label>
+<textarea id="problem" name="problem" rows="3" placeholder="ما المهمة أو العملية التي ترى أن الذكاء الاصطناعي قد يساعدك في تحسينها؟" required></textarea>
+<label>حجم العمل *</label>
+<div class="radio-grid">
+<label class="radio-opt"><input type="radio" name="size" value="مستقل أو مشروع فردي" required> مستقل أو مشروع فردي</label>
+<label class="radio-opt"><input type="radio" name="size" value="من 2 إلى 10 موظفين"> من 2 إلى 10 موظفين</label>
+<label class="radio-opt"><input type="radio" name="size" value="من 11 إلى 50 موظفًا"> من 11 إلى 50 موظفًا</label>
+<label class="radio-opt"><input type="radio" name="size" value="من 51 إلى 200 موظف"> من 51 إلى 200 موظف</label>
+<label class="radio-opt"><input type="radio" name="size" value="أكثر من 200 موظف"> أكثر من 200 موظف</label>
+</div>
+<button type="submit" class="btn btn-primary full" style="margin-top:18px;width:100%">احجز جلستي المجانية</button>
+<p class="form-note" id="bookingNote" role="status" style="margin-top:10px;font-size:14px"></p>
+<p class="hint">بإرسالك النموذج أنت توافق على أن أتواصل معك على واتساب والإيميل لتأكيد الجلسة. لن أشارك بياناتك أبداً.</p>
+</form>
+</div>
+</div>
+</div></section>
+
+<section class="section soft"><div class="container" style="max-width:780px">
+<h2 class="section-title">أسئلة عن الجلسة المجانية</h2>
+<div class="faq-item reveal"><button class="faq-q">هل الجلسة مجانية فعلاً؟ <span class="plus">+</span></button><div class="faq-a"><p>نعم 100% وبدون التزام. هدفي أن تفهم أين يقف عملك وما أنسب خطوة — سواء نفذتها معي أو وحدك.</p></div></div>
+<div class="faq-item reveal"><button class="faq-q">ماذا أحضّر قبل الجلسة؟ <span class="plus">+</span></button><div class="faq-a"><p>فقط املأ النموذج بصدق: طبيعة عملك وأكبر مشكلة. كلما كنت واضحاً جهزت لك حلاً أدق.</p></div></div>
+<div class="faq-item reveal"><button class="faq-q">أين تذهب بياناتي؟ <span class="plus">+</span></button><div class="faq-a"><p>تصلني وتُحفظ في جدولك الخاص عند تفعيل Google Form. أستخدمها فقط للتحضير والتواصل معك.</p></div></div>
+<div class="faq-item reveal"><button class="faq-q">كيف أربط النموذج مع Google Form؟ <span class="plus">+</span></button><div class="faq-a"><p>أنشئ Google Form بنفس الحقول، انسخ رابط formResponse ومعرفات entries، والصقها في GOOGLE_FORM_CONFIG داخل script.js واجعل enabled: true. ستجد شرحاً داخل الملف.</p></div></div>
+</div></section>
+</main>
+<footer class="footer"><div class="container footer-grid">
+<div><a href="index.html" class="logo"><span class="logo-mark">ن</span><span class="light">النذير</span></a><p class="f-muted">جلسة مجانية وحل عام وخارطة بدء.</p></div>
+<div><h4>صفحات</h4><a href="index.html">الرئيسية</a><a href="services.html">الخدمات</a><a href="projects.html">المشاريع</a><a href="faq.html">الأسئلة الشائعة</a></div>
+<div><h4>خدماتي</h4><a href="ai-agents.html">وكلاء الذكاء الاصطناعي</a><a href="custom-ai.html">حلول مخصصة</a><a href="software.html">تطوير البرمجيات</a></div>
+<div><h4>تواصل معي</h4><a href="free-session.html">الجلسة المجانية</a><a href="contact.html">تواصل معي</a></div>
+</div><div class="footer-bottom">© 2026 النذير — جميع الحقوق محفوظة</div></footer>
+<button class="to-top" id="toTop" aria-label="العودة للأعلى">↑</button>
+<script src="script.js" defer></script>
+</body>
+</html>
