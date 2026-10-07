@@ -46,26 +46,6 @@
 <input type="tel" id="phone" name="phone" placeholder="مثال: 9665XXXXXXXX" required autocomplete="tel" dir="ltr" style="text-align:end">
 <label for="email">البريد الإلكتروني *</label>
 <input type="email" id="email" name="email" placeholder="you@email.com" required autocomplete="email" dir="ltr" style="text-align:end">
-<label for="serviceInterest">ما الخدمة التي تهمك؟ (اختياري)</label>
-<select id="serviceInterest" name="service">
-<option value="">اختر إن كنت تعرف…</option>
-<option>روبوتات المحادثة الذكية</option>
-<option>الوكلاء الصوتيون</option>
-<option>وكلاء الذكاء الاصطناعي</option>
-<option>أتمتة العمليات والمهام</option>
-<option>دمج الذكاء الاصطناعي</option>
-<option>حلول الذكاء الاصطناعي المخصصة</option>
-<option>تخصيص نماذج الذكاء الاصطناعي</option>
-<option>أنظمة الأعمال المدعومة بالذكاء الاصطناعي</option>
-<option>تطوير المواقع</option>
-<option>تطوير المتاجر الإلكترونية</option>
-<option>تطوير تطبيقات الهاتف</option>
-<option>تطوير أنظمة الشركات</option>
-<option>أنظمة ERP</option>
-<option>أنظمة CRM</option>
-<option>الأنظمة البرمجية المخصصة</option>
-<option>لست متأكداً — أحتاج مساعدتك</option>
-</select>
 <label for="workType">ما طبيعة عملك؟ *</label>
 <textarea id="workType" name="work" rows="3" placeholder="اكتب نبذة مختصرة عن نشاطك أو شركتك والخدمات التي تقدمها." required></textarea>
 <label for="problem">ما أكبر مشكلة تواجهها حالياً؟ *</label>
@@ -83,6 +63,15 @@
 <p class="form-note" id="bookingNote" role="status" style="margin-top:10px;font-size:14px"></p>
 <p class="hint">بإرسالك النموذج أنت توافق على أن أتواصل معك على واتساب والإيميل لتأكيد الاستشارة. لن أشارك بياناتك أبداً.</p>
 </form>
+<div class="booking-success" id="bookingSuccess" hidden>
+  <span class="success-check" aria-hidden="true">✓</span>
+  <h3>تم استلام طلبك يا <span id="successName"></span>!</h3>
+  <p class="muted">سأتواصل معك على واتساب قريباً لتأكيد موعد استشارتك المجانية.</p>
+  <div class="hero-cta" style="justify-content:center">
+    <a class="btn btn-primary" href="https://wa.me/249117148664?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%20%D8%AD%D8%AC%D8%B2%D8%AA%20%D8%A7%D8%B3%D8%AA%D8%B4%D8%A7%D8%B1%D8%A9%20%D9%85%D8%AC%D8%A7%D9%86%D9%8A%D8%A9" target="_blank" rel="noopener">تواصل معي واتساب الآن</a>
+  </div>
+  <button class="link" id="bookAgain" type="button" style="background:none;border:none;cursor:pointer;font-family:inherit;margin-top:10px">إرسال طلب آخر ←</button>
+</div>
 </div>
 </div>
 </div></section>

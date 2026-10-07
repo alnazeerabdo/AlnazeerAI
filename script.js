@@ -16,9 +16,8 @@
       phone: 'entry.1020849488',
       email: 'entry.434279055',
       work: 'entry.693245584',
-      problem: 'entry.270648502',
-      size: 'entry.262587177',
-      service: 'entry.7777777777'
+      problem: 'entry.262587177',
+      size: 'entry.270648502'
     }
   };
   window.GOOGLE_FORM_CONFIG = GOOGLE_FORM_CONFIG;
@@ -156,15 +155,34 @@
       var email = (document.getElementById('email') || {}).value || '';
       var work = (document.getElementById('workType') || {}).value || '';
       var problem = (document.getElementById('problem') || {}).value || '';
-      var serviceInterest = (document.getElementById('serviceInterest') || {}).value || '';
       var sizeEl = document.getElementById('workSize');
       var size = sizeEl ? sizeEl.value.trim() : '';
       var noteEl = document.getElementById('bookingNote');
+      var successEl = document.getElementById('bookingSuccess');
       name = name.trim(); phone = phone.trim(); email = email.trim(); work = work.trim(); problem = problem.trim();
       function say(msg, ok) {
         if (!noteEl) return;
         noteEl.style.color = ok ? '#1a7f37' : '#b42318';
         noteEl.textContent = msg;
+      }
+      function showSuccess() {
+        var nm = document.getElementById('successName');
+        if (nm) nm.textContent = name;
+        booking.style.display = 'none';
+        if (successEl) {
+          successEl.hidden = false;
+          if (successEl.scrollIntoView) successEl.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+        }
+        booking.reset();
+      }
+      var againBtn = document.getElementById('bookAgain');
+      if (againBtn && !againBtn.dataset.bound) {
+        againBtn.dataset.bound = '1';
+        againBtn.addEventListener('click', function () {
+          if (successEl) successEl.hidden = true;
+          booking.style.display = '';
+          if (noteEl) noteEl.textContent = '';
+        });
       }
       if (!name || !phone || !email || !work || !problem || !size) {
         say('يرجى تعبئة جميع الحقول المطلوبة حتى أجهز لك الاستشارة بشكل صحيح.', false);
@@ -183,19 +201,15 @@
         fd.append(GOOGLE_FORM_CONFIG.fields.work, work);
         fd.append(GOOGLE_FORM_CONFIG.fields.problem, problem);
         fd.append(GOOGLE_FORM_CONFIG.fields.size, size);
-        fd.append(GOOGLE_FORM_CONFIG.fields.service, serviceInterest);
         fetch(GOOGLE_FORM_CONFIG.actionUrl, { method: 'POST', mode: 'no-cors', body: fd })
           .then(function () {
-            say('تم استلام طلبك يا ' + name + '! سأتواصل معك قريباً لتأكيد موعد الاستشارة المجانية.', true);
-            booking.reset();
+            showSuccess();
           })
           .catch(function () {
-            say('تم حفظ طلبك محلياً، سأتواصل معك قريباً يا ' + name + '.', true);
-            booking.reset();
+            showSuccess();
           });
       } else {
-        say('شكراً ' + name + '! تم استلام طلب استشارتك المجانية وسأتواصل معك على واتساب قريباً. (لتفعيل الربط التلقائي: ضع رابط Google Form في script.js)', true);
-        booking.reset();
+        showSuccess();
       }
     });
   }

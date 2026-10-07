@@ -342,3 +342,9 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .chat-input{display:flex;gap:8px;padding:14px 16px 16px}
 .chat-input input{flex:1;border:1px solid var(--border);border-radius:var(--pill);padding:12px 16px;font-family:inherit;font-size:14px}
 .chat-input input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(233,180,76,.2)}
+/* Booking success panel */
+.booking-success{text-align:center;padding:26px 10px}
+@keyframes pop{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+.success-check{width:76px;height:76px;border-radius:50%;background:var(--black);color:var(--gold);display:grid;place-items:center;font-size:32px;margin:0 auto 16px;animation:pop .5s var(--ease)}
+.booking-success h3{font-size:22px;margin-bottom:8px}
+.booking-success .hero-cta{margin-top:18px}
