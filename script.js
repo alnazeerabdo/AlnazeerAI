@@ -9,15 +9,15 @@
      مثال: https://docs.google.com/forms/d/e/XXXX/formResponse
   */
   var GOOGLE_FORM_CONFIG = {
-    enabled: true, // مربوط بنموذج الاستشارة
-    actionUrl: 'https://docs.google.com/forms/d/e/1FAIpQLScfs-5uOiLeMRdiXPc5Ejx2wtqQBU_s5kGaHRdrEONau2XaSA/formResponse',
+    enabled: true, // الإرسال عبر Apps Script إلى Google Sheet مباشرة
+    actionUrl: 'https://script.google.com/macros/s/AKfycbxR1B9QCCZF-9gN-_uexloBwxDDKl8qf9CzVYaN9K0NQZstVnLnwPR6ANpYCseyTgp1/exec',
     fields: {
-      name: 'entry.1189493510',
-      phone: 'entry.1020849488',
-      email: 'entry.434279055',
-      work: 'entry.693245584',
-      problem: 'entry.262587177',
-      size: 'entry.270648502'
+      name: 'name',
+      phone: 'phone',
+      email: 'email',
+      work: 'work',
+      problem: 'problem',
+      size: 'size'
     }
   };
   window.GOOGLE_FORM_CONFIG = GOOGLE_FORM_CONFIG;
