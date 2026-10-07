@@ -138,7 +138,7 @@
       var note = document.getElementById('servicePrefill');
       if (serviceField) serviceField.value = svc;
       if (note) {
-        note.textContent = 'اخترت: ' + svc + ' — اذكر لي تفاصيل أكثر لأجهز لك حلاً عاماً في الجلسة.';
+        note.textContent = 'اخترت: ' + svc + ' — اذكر لي تفاصيل أكثر لأجهز لك حلاً عاماً في الاستشارة.';
         note.style.display = 'block';
       } else if (problemField && !problemField.value) {
         problemField.value = 'مهتم بخدمة: ' + svc + ' — ';
@@ -167,7 +167,7 @@
         noteEl.textContent = msg;
       }
       if (!name || !phone || !email || !work || !problem || !size) {
-        say('يرجى تعبئة جميع الحقول المطلوبة حتى أجهز لك الجلسة بشكل صحيح.', false);
+        say('يرجى تعبئة جميع الحقول المطلوبة حتى أجهز لك الاستشارة بشكل صحيح.', false);
         return;
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -186,7 +186,7 @@
         fd.append(GOOGLE_FORM_CONFIG.fields.service, serviceInterest);
         fetch(GOOGLE_FORM_CONFIG.actionUrl, { method: 'POST', mode: 'no-cors', body: fd })
           .then(function () {
-            say('تم استلام طلبك يا ' + name + '! سأتواصل معك قريباً لتأكيد موعد الجلسة المجانية.', true);
+            say('تم استلام طلبك يا ' + name + '! سأتواصل معك قريباً لتأكيد موعد الاستشارة المجانية.', true);
             booking.reset();
           })
           .catch(function () {
@@ -194,13 +194,21 @@
             booking.reset();
           });
       } else {
-        say('شكراً ' + name + '! تم استلام طلب جلستك المجانية وسأتواصل معك على واتساب قريباً. (لتفعيل الربط التلقائي: ضع رابط Google Form في script.js)', true);
+        say('شكراً ' + name + '! تم استلام طلب استشارتك المجانية وسأتواصل معك على واتساب قريباً. (لتفعيل الربط التلقائي: ضع رابط Google Form في script.js)', true);
         booking.reset();
       }
     });
   }
 
-  // Simple contact form (contact.html)
+  // Optional Google Form for the contact page (fill + set enabled:true)
+  var CONTACT_FORM_CONFIG = {
+    enabled: false,
+    actionUrl: '',
+    fields: { name: 'entry.1111111111', email: 'entry.2222222222', type: 'entry.3333333333', message: 'entry.4444444444' }
+  };
+  window.CONTACT_FORM_CONFIG = CONTACT_FORM_CONFIG;
+
+  // Contact form (contact.html)
   var cform = document.getElementById('contactForm');
   if (cform && !booking) {
     cform.addEventListener('submit', function (e) {
@@ -211,14 +219,75 @@
       var ms = document.getElementById('msg');
       var note = document.getElementById('formNote');
       if (!n || !em || !tp || !ms) return;
-      if (!n.value.trim() || !em.value.trim() || !tp.value || !ms.value.trim()) {
+      var nv = n.value.trim(), ev = em.value.trim(), tv = tp.value, mv = ms.value.trim();
+      if (!nv || !ev || !tv || !mv) {
         note.style.color = '#FFB4B4';
         note.textContent = 'يرجى تعبئة جميع الحقول المطلوبة.';
         return;
       }
-      note.style.color = '#E9B44C';
-      note.textContent = 'شكراً ' + n.value.trim() + '! وصلتني رسالتك وسأرد عليك قريباً. وإن كنت تريد حلاً أسرع احجز جلستك المجانية.';
-      cform.reset();
+      function done(ok) {
+        note.style.color = ok ? '#E9B44C' : '#FFB4B4';
+        note.textContent = ok ? ('شكراً ' + nv + '! وصلتني رسالتك وسأرد عليك قريباً. وإن كنت تريد حلاً أسرع احجز استشارتك المجانية.') : 'تعذر الإرسال، حاول مجدداً أو تواصل واتساب.';
+        if (ok) cform.reset();
+      }
+      if (CONTACT_FORM_CONFIG.enabled && CONTACT_FORM_CONFIG.actionUrl) {
+        var cfd = new FormData();
+        cfd.append(CONTACT_FORM_CONFIG.fields.name, nv);
+        cfd.append(CONTACT_FORM_CONFIG.fields.email, ev);
+        cfd.append(CONTACT_FORM_CONFIG.fields.type, tv);
+        cfd.append(CONTACT_FORM_CONFIG.fields.message, mv);
+        fetch(CONTACT_FORM_CONFIG.actionUrl, { method: 'POST', mode: 'no-cors', body: cfd })
+          .then(function () { done(true); })
+          .catch(function () { done(false); });
+      } else {
+        done(true);
+      }
+    });
+  }
+
+  // Mobile drawer helpers: overlay, close button, Escape
+  (function () {
+    if (!navLinks) return;
+    var ov = document.createElement('div');
+    ov.className = 'nav-overlay';
+    document.body.appendChild(ov);
+    var dc = document.createElement('button');
+    dc.className = 'drawer-close';
+    dc.setAttribute('aria-label', 'إغلاق القائمة');
+    dc.textContent = '\u00d7';
+    navLinks.prepend(dc);
+    function sync() { ov.classList.toggle('show', navLinks.classList.contains('open')); }
+    if (menuBtn) menuBtn.addEventListener('click', function () { setTimeout(sync, 0); });
+    function hide() { navLinks.classList.remove('open'); sync(); if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false'); }
+    ov.addEventListener('click', hide);
+    dc.addEventListener('click', hide);
+    navLinks.addEventListener('click', function (e) { if (e.target.closest('a')) setTimeout(sync, 0); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        hide();
+        var cp = document.getElementById('chatPop');
+        if (cp) cp.classList.remove('open');
+        var cf = document.getElementById('chatFab');
+        if (cf) { cf.classList.remove('open'); cf.setAttribute('aria-expanded', 'false'); }
+      }
+    });
+  })();
+
+  // Contact popup (WhatsApp / AI assistant)
+  var chatFab = document.getElementById('chatFab'), chatPop = document.getElementById('chatPop');
+  if (chatFab && chatPop) {
+    chatFab.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var o = chatPop.classList.toggle('open');
+      chatFab.classList.toggle('open', o);
+      chatFab.setAttribute('aria-expanded', o ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (!chatPop.contains(e.target)) {
+        chatPop.classList.remove('open');
+        chatFab.classList.remove('open');
+        chatFab.setAttribute('aria-expanded', 'false');
+      }
     });
   }
 })();
