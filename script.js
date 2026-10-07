@@ -157,8 +157,8 @@
       var work = (document.getElementById('workType') || {}).value || '';
       var problem = (document.getElementById('problem') || {}).value || '';
       var serviceInterest = (document.getElementById('serviceInterest') || {}).value || '';
-      var sizeEl = booking.querySelector('input[name="size"]:checked');
-      var size = sizeEl ? sizeEl.value : '';
+      var sizeEl = document.getElementById('workSize');
+      var size = sizeEl ? sizeEl.value.trim() : '';
       var noteEl = document.getElementById('bookingNote');
       name = name.trim(); phone = phone.trim(); email = email.trim(); work = work.trim(); problem = problem.trim();
       function say(msg, ok) {
