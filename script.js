@@ -159,6 +159,20 @@
       var size = sizeEl ? sizeEl.value.trim() : '';
       var noteEl = document.getElementById('bookingNote');
       var successEl = document.getElementById('bookingSuccess');
+      var submitBtn = booking.querySelector('button[type="submit"]');
+      var submitHtml = submitBtn ? submitBtn.innerHTML : '';
+      function setLoading(on) {
+        if (!submitBtn) return;
+        if (on) {
+          submitBtn.disabled = true;
+          submitBtn.classList.add('loading');
+          submitBtn.innerHTML = 'جارٍ الإرسال<span class="dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>';
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('loading');
+          submitBtn.innerHTML = submitHtml;
+        }
+      }
       name = name.trim(); phone = phone.trim(); email = email.trim(); work = work.trim(); problem = problem.trim();
       function say(msg, ok) {
         if (!noteEl) return;
@@ -166,6 +180,7 @@
         noteEl.textContent = msg;
       }
       function showSuccess() {
+        setLoading(false);
         var nm = document.getElementById('successName');
         if (nm) nm.textContent = name;
         booking.style.display = 'none';
@@ -193,6 +208,7 @@
         return;
       }
       // إرسال إلى Google Form إن كان مفعّلاً
+      setLoading(true);
       if (GOOGLE_FORM_CONFIG.enabled && GOOGLE_FORM_CONFIG.actionUrl) {
         var fd = new FormData();
         fd.append(GOOGLE_FORM_CONFIG.fields.name, name);

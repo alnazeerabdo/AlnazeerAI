@@ -348,3 +348,9 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .success-check{width:76px;height:76px;border-radius:50%;background:var(--black);color:var(--gold);display:grid;place-items:center;font-size:32px;margin:0 auto 16px;animation:pop .5s var(--ease)}
 .booking-success h3{font-size:22px;margin-bottom:8px}
 .booking-success .hero-cta{margin-top:18px}
+/* Submit button loading dots */
+.btn.loading{opacity:.88;pointer-events:none;cursor:wait}
+.dots span{display:inline-block;animation:blink 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.2}30%{opacity:1}}
