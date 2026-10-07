@@ -37,7 +37,8 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .nav-inner{background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:var(--pill);display:flex;align-items:center;justify-content:space-between;padding:8px 10px 8px 20px;box-shadow:var(--shadow-sm)}
 [dir="rtl"] .nav-inner{padding:8px 20px 8px 10px}
 .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px}
-.logo-mark{width:38px;height:38px;border-radius:50%;background:var(--black);color:var(--gold);display:grid;place-items:center;font-size:20px;transition:transform .35s var(--ease),background .35s var(--ease),color .35s var(--ease)}
+.logo-mark{width:38px;height:38px;border-radius:50%;background:var(--black);color:var(--gold);display:grid;place-items:center;font-size:20px;overflow:hidden;transition:transform .35s var(--ease)}
+.logo-mark img{width:100%;height:100%;object-fit:cover;display:block}
 .logo:hover .logo-mark{transform:rotate(-8deg) scale(1.06)}
 .logo .light{color:#fff}
 .nav-links{display:flex;gap:20px;font-size:14.5px;font-weight:500}

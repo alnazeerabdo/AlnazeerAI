@@ -9,15 +9,15 @@
      مثال: https://docs.google.com/forms/d/e/XXXX/formResponse
   */
   var GOOGLE_FORM_CONFIG = {
-    enabled: false, // اجعلها true بعد وضع الرابط
-    actionUrl: '', // مثال: 'https://docs.google.com/forms/d/e/XXXX/formResponse'
+    enabled: true, // مربوط بنموذج الاستشارة
+    actionUrl: 'https://docs.google.com/forms/d/e/1FAIpQLScfs-5uOiLeMRdiXPc5Ejx2wtqQBU_s5kGaHRdrEONau2XaSA/formResponse',
     fields: {
-      name: 'entry.1111111111',
-      phone: 'entry.2222222222',
-      email: 'entry.3333333333',
-      work: 'entry.4444444444',
-      problem: 'entry.5555555555',
-      size: 'entry.6666666666',
+      name: 'entry.1189493510',
+      phone: 'entry.1020849488',
+      email: 'entry.434279055',
+      work: 'entry.693245584',
+      problem: 'entry.270648502',
+      size: 'entry.262587177',
       service: 'entry.7777777777'
     }
   };
