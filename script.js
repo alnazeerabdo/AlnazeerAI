@@ -353,7 +353,7 @@
     });
   })();
 
-  // Contact popup (WhatsApp / AI assistant)
+  // Chat popup toggle
   var chatFab = document.getElementById('chatFab'), chatPop = document.getElementById('chatPop');
   if (chatFab && chatPop) {
     chatFab.addEventListener('click', function (e) {
@@ -370,4 +370,79 @@
       }
     });
   }
+
+  /* ===== AI chat (Groq via Cloudflare Worker) =====
+     بعد نشر الـ Worker الصق رابطه هنا، مثال:
+     var AI_WORKER_URL = 'https://alnathir-ai.username.workers.dev';
+     اتركه فارغاً وستظهر رسالة توجيه للواتساب والحجز. */
+  var AI_WORKER_URL = '';
+  (function () {
+    var log = document.getElementById('aiLog');
+    if (!log) return;
+    var form = document.getElementById('aiForm'), inp = document.getElementById('aiText');
+    var chips = document.getElementById('aiChips');
+    var hist = [], busy = false, lastSend = 0;
+    function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function linkify(s) {
+      var e = esc(s);
+      e = e.replace(/https?:\/\/[^\s<]+/g, function (u) { return '<a href="' + u + '" target="_blank" rel="noopener">رابط</a>'; });
+      e = e.replace(/((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software)\.html[^\s<]*)/g, '<a href="$1">هنا</a>');
+      return e;
+    }
+    function add(cls, html) {
+      var d = document.createElement('div');
+      d.className = 'ai-msg ' + cls;
+      d.innerHTML = html;
+      log.appendChild(d);
+      log.scrollTop = log.scrollHeight;
+      return d;
+    }
+    function greet() {
+      if (log.children.length) return;
+      add('bot', 'أهلاً بك! أنا المساعد الذكي. اسألني عن <strong>الخدمات</strong>، <strong>الأسعار</strong>، أو <strong>حجز الاستشارة المجانية</strong>.');
+    }
+    function offline() {
+      add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="free-session.html">حجز استشارتك المجانية</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
+    }
+    function send(q) {
+      add('user', esc(q));
+      if (!AI_WORKER_URL) { offline(); return; }
+      var now = Date.now();
+      if (busy || now - lastSend < 3000) { if (!busy) add('bot', 'مهلاً قليلاً…'); return; }
+      busy = true; lastSend = now;
+      var tp = add('bot ai-typing', '…');
+      hist.push({ role: 'user', content: q });
+      hist = hist.slice(-6);
+      fetch(AI_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: hist }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          busy = false;
+          tp.classList.remove('ai-typing');
+          var t = (j && j.text) || 'عذراً، حاول مجدداً.';
+          tp.innerHTML = linkify(t);
+          log.scrollTop = log.scrollHeight;
+          hist.push({ role: 'assistant', content: t });
+          hist = hist.slice(-6);
+        })
+        .catch(function () {
+          busy = false;
+          tp.classList.remove('ai-typing');
+          tp.innerHTML = 'تعذر الاتصال. <a href="free-session.html">احجز استشارتك</a> أو راسلني واتساب.';
+          log.scrollTop = log.scrollHeight;
+        });
+    }
+    if (form) form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var q = inp.value.trim().slice(0, 500);
+      if (!q) return;
+      inp.value = '';
+      send(q);
+    });
+    if (chips) chips.addEventListener('click', function (e) {
+      var b = e.target.closest('.chip');
+      if (b) send(b.textContent);
+    });
+    if (chatFab) chatFab.addEventListener('click', function () { setTimeout(greet, 350); });
+    greet();
+  })();
 })();
