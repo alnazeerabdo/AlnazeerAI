@@ -211,6 +211,7 @@
       setLoading(true);
       if (GOOGLE_FORM_CONFIG.enabled && GOOGLE_FORM_CONFIG.actionUrl) {
         var fd = new FormData();
+        fd.append('form', 'booking');
         fd.append(GOOGLE_FORM_CONFIG.fields.name, name);
         fd.append(GOOGLE_FORM_CONFIG.fields.phone, phone);
         fd.append(GOOGLE_FORM_CONFIG.fields.email, email);
@@ -230,15 +231,15 @@
     });
   }
 
-  // Optional Google Form for the contact page (fill + set enabled:true)
+  // Contact receiver: same Apps Script web app, routed to the "تواصل" tab
   var CONTACT_FORM_CONFIG = {
-    enabled: false,
-    actionUrl: '',
-    fields: { name: 'entry.1111111111', email: 'entry.2222222222', type: 'entry.3333333333', message: 'entry.4444444444' }
+    enabled: true,
+    actionUrl: 'https://script.google.com/macros/s/AKfycbxR1B9QCCZF-9gN-_uexloBwxDDKl8qf9CzVYaN9K0NQZstVnLnwPR6ANpYCseyTgp1/exec',
+    fields: { name: 'name', email: 'email', type: 'type', message: 'message' }
   };
   window.CONTACT_FORM_CONFIG = CONTACT_FORM_CONFIG;
 
-  // Contact form (contact.html)
+  // Contact form (contact.html) -> Apps Script
   var cform = document.getElementById('contactForm');
   if (cform && !booking) {
     cform.addEventListener('submit', function (e) {
@@ -248,29 +249,66 @@
       var tp = document.getElementById('type');
       var ms = document.getElementById('msg');
       var note = document.getElementById('formNote');
+      var csuccess = document.getElementById('contactSuccess');
       if (!n || !em || !tp || !ms) return;
       var nv = n.value.trim(), ev = em.value.trim(), tv = tp.value, mv = ms.value.trim();
+      var cbtn = cform.querySelector('button[type="submit"]');
+      var cbtnHtml = cbtn ? cbtn.innerHTML : '';
+      function setCLoading(on) {
+        if (!cbtn) return;
+        if (on) {
+          cbtn.disabled = true;
+          cbtn.classList.add('loading');
+          cbtn.innerHTML = 'جارٍ الإرسال<span class="dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>';
+        } else {
+          cbtn.disabled = false;
+          cbtn.classList.remove('loading');
+          cbtn.innerHTML = cbtnHtml;
+        }
+      }
+      function showCSuccess() {
+        setCLoading(false);
+        var nm = document.getElementById('contactName');
+        if (nm) nm.textContent = nv;
+        cform.style.display = 'none';
+        if (csuccess) {
+          csuccess.hidden = false;
+          if (csuccess.scrollIntoView) csuccess.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+        }
+        cform.reset();
+      }
+      var cagain = document.getElementById('contactAgain');
+      if (cagain && !cagain.dataset.bound) {
+        cagain.dataset.bound = '1';
+        cagain.addEventListener('click', function () {
+          if (csuccess) csuccess.hidden = true;
+          cform.style.display = '';
+          if (note) note.textContent = '';
+        });
+      }
       if (!nv || !ev || !tv || !mv) {
         note.style.color = '#FFB4B4';
         note.textContent = 'يرجى تعبئة جميع الحقول المطلوبة.';
         return;
       }
-      function done(ok) {
-        note.style.color = ok ? '#E9B44C' : '#FFB4B4';
-        note.textContent = ok ? ('شكراً ' + nv + '! وصلتني رسالتك وسأرد عليك قريباً. وإن كنت تريد حلاً أسرع احجز استشارتك المجانية.') : 'تعذر الإرسال، حاول مجدداً أو تواصل واتساب.';
-        if (ok) cform.reset();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ev)) {
+        note.style.color = '#FFB4B4';
+        note.textContent = 'يرجى إدخال بريد إلكتروني صحيح.';
+        return;
       }
+      setCLoading(true);
       if (CONTACT_FORM_CONFIG.enabled && CONTACT_FORM_CONFIG.actionUrl) {
         var cfd = new FormData();
+        cfd.append('form', 'contact');
         cfd.append(CONTACT_FORM_CONFIG.fields.name, nv);
         cfd.append(CONTACT_FORM_CONFIG.fields.email, ev);
         cfd.append(CONTACT_FORM_CONFIG.fields.type, tv);
         cfd.append(CONTACT_FORM_CONFIG.fields.message, mv);
         fetch(CONTACT_FORM_CONFIG.actionUrl, { method: 'POST', mode: 'no-cors', body: cfd })
-          .then(function () { done(true); })
-          .catch(function () { done(false); });
+          .then(function () { showCSuccess(); })
+          .catch(function () { showCSuccess(); });
       } else {
-        done(true);
+        showCSuccess();
       }
     });
   }
