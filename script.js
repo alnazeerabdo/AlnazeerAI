@@ -235,7 +235,7 @@
   var CONTACT_FORM_CONFIG = {
     enabled: true,
     actionUrl: 'https://script.google.com/macros/s/AKfycbxR1B9QCCZF-9gN-_uexloBwxDDKl8qf9CzVYaN9K0NQZstVnLnwPR6ANpYCseyTgp1/exec',
-    fields: { name: 'name', email: 'email', type: 'type', message: 'message' }
+    fields: { name: 'name', phone: 'phone', email: 'email', message: 'message' }
   };
   window.CONTACT_FORM_CONFIG = CONTACT_FORM_CONFIG;
 
@@ -245,13 +245,13 @@
     cform.addEventListener('submit', function (e) {
       e.preventDefault();
       var n = document.getElementById('name');
+      var ph = document.getElementById('cphone');
       var em = document.getElementById('email');
-      var tp = document.getElementById('type');
       var ms = document.getElementById('msg');
       var note = document.getElementById('formNote');
       var csuccess = document.getElementById('contactSuccess');
-      if (!n || !em || !tp || !ms) return;
-      var nv = n.value.trim(), ev = em.value.trim(), tv = tp.value, mv = ms.value.trim();
+      if (!n || !ph || !em || !ms) return;
+      var nv = n.value.trim(), pv = ph.value.trim(), ev = em.value.trim(), mv = ms.value.trim();
       var cbtn = cform.querySelector('button[type="submit"]');
       var cbtnHtml = cbtn ? cbtn.innerHTML : '';
       function setCLoading(on) {
@@ -286,7 +286,7 @@
           if (note) note.textContent = '';
         });
       }
-      if (!nv || !ev || !tv || !mv) {
+      if (!nv || !pv || !ev || !mv) {
         note.style.color = '#FFB4B4';
         note.textContent = 'يرجى تعبئة جميع الحقول المطلوبة.';
         return;
@@ -301,8 +301,8 @@
         var cfd = new FormData();
         cfd.append('form', 'contact');
         cfd.append(CONTACT_FORM_CONFIG.fields.name, nv);
+        cfd.append(CONTACT_FORM_CONFIG.fields.phone, pv);
         cfd.append(CONTACT_FORM_CONFIG.fields.email, ev);
-        cfd.append(CONTACT_FORM_CONFIG.fields.type, tv);
         cfd.append(CONTACT_FORM_CONFIG.fields.message, mv);
         fetch(CONTACT_FORM_CONFIG.actionUrl, { method: 'POST', mode: 'no-cors', body: cfd })
           .then(function () { showCSuccess(); })
