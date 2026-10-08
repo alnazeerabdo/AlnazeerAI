@@ -319,12 +319,24 @@
     var ov = document.createElement('div');
     ov.className = 'nav-overlay';
     document.body.appendChild(ov);
+    var dh = document.createElement('div');
+    dh.className = 'drawer-head';
+    dh.innerHTML = '<img src="images/alnazeerlogo.png" alt="النذير">';
     var dc = document.createElement('button');
     dc.className = 'drawer-close';
     dc.setAttribute('aria-label', 'إغلاق القائمة');
-    dc.textContent = '\u00d7';
-    navLinks.prepend(dc);
-    function sync() { ov.classList.toggle('show', navLinks.classList.contains('open')); }
+    dc.textContent = '×';
+    dh.appendChild(dc);
+    navLinks.prepend(dh);
+    var dcta = document.createElement('div');
+    dcta.className = 'drawer-cta';
+    dcta.innerHTML = '<a href="free-session.html" class="btn btn-primary">استشارة مجانية</a>';
+    navLinks.appendChild(dcta);
+    function sync() {
+      var open = navLinks.classList.contains('open');
+      ov.classList.toggle('show', open);
+      document.body.style.overflow = open ? 'hidden' : '';
+    }
     if (menuBtn) menuBtn.addEventListener('click', function () { setTimeout(sync, 0); });
     function hide() { navLinks.classList.remove('open'); sync(); if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false'); }
     ov.addEventListener('click', hide);
