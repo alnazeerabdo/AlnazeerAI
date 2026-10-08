@@ -399,7 +399,7 @@
     }
     function greet() {
       if (log.children.length) return;
-      add('bot', 'أهلاً بك! أنا المساعد الذكي. اسألني عن <strong>الخدمات</strong>، <strong>الأسعار</strong>، أو <strong>حجز الاستشارة المجانية</strong>.');
+      add('bot', 'أهلاً بك! أنا المساعد الذكي. اسألني عن <strong>الخدمات</strong>، <strong>الأسعار</strong>، أو <strong>حجز الاستشارة المجانية</strong>. <small style="color:#8E94A0">(قد تُحفظ المحادثة لتحسين الخدمة)</small>');
     }
     function offline() {
       add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="free-session.html">حجز استشارتك المجانية</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
