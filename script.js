@@ -375,7 +375,7 @@
      بعد نشر الـ Worker الصق رابطه هنا، مثال:
      var AI_WORKER_URL = 'https://alnathir-ai.username.workers.dev';
      اتركه فارغاً وستظهر رسالة توجيه للواتساب والحجز. */
-  var AI_WORKER_URL = '';
+  var AI_WORKER_URL = 'https://alnazeerai.alnzyrbdalmnm90.workers.dev/';
   (function () {
     var log = document.getElementById('aiLog');
     if (!log) return;
