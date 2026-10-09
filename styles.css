@@ -393,8 +393,8 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 /* About buttons spacing + responsive wrap */
 .about-grid .hero-cta{margin-top:18px}
 /* Course cover image */
-.course-player{padding:0;overflow:hidden}
-.course-player img{width:100%;height:100%;object-fit:cover;display:block}
+.course-player{padding:0;overflow:hidden;height:auto;min-height:0}
+.course-player img{width:100%;height:auto;display:block;background:#E9B44C}
 @media(max-width:960px){
   .drawer-close{background:var(--gold);border-color:var(--gold);color:var(--black);width:42px;height:42px;font-size:22px}
 }
