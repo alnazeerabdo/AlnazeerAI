@@ -387,3 +387,27 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .ai-input{display:flex;gap:8px;padding:10px 12px 12px}
 .ai-input input{flex:1;min-width:0;border:1px solid var(--border);border-radius:var(--pill);padding:10px 14px;font-family:inherit;font-size:13.5px}
 .ai-input input:focus{outline:none;border-color:var(--gold)}
+
+/* Footer CTA + grids */
+.footer .btn{white-space:nowrap}
+/* About buttons spacing + responsive wrap */
+.about-grid .hero-cta{margin-top:18px}
+/* Course cover image */
+.course-player{padding:0;overflow:hidden}
+.course-player img{width:100%;height:100%;object-fit:cover;display:block}
+@media(max-width:960px){
+  .drawer-close{background:var(--gold);border-color:var(--gold);color:var(--black);width:42px;height:42px;font-size:22px}
+}
+@media(max-width:600px){
+  .footer-grid{grid-template-columns:1fr}
+  .footer .btn{font-size:12.5px;padding:10px 14px}
+  .logo-img{height:30px;max-width:120px}
+  .nav-actions{gap:6px}
+  .menu-btn{width:36px;height:36px}
+  .about-grid .hero-cta{flex-wrap:wrap}
+  .about-grid .hero-cta .btn{flex:1 1 220px}
+}
+@media(max-width:380px){
+  .nav-links > a{font-size:15px;padding:11px 12px}
+  .drawer-cta .btn{font-size:13px}
+}
