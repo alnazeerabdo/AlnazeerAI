@@ -371,6 +371,13 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 /* Project thumbnail cover */
 .proj-cover{background:#fff;border:1px solid var(--border);border-radius:14px;height:130px;display:grid;place-items:center;margin-bottom:14px;overflow:hidden;padding:14px}
 .proj-cover img{max-height:100%;width:auto;max-width:100%;object-fit:contain;display:block}
+/* Project gallery (real store shots) */
+.proj-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.proj-gallery img{width:100%;height:170px;object-fit:cover;border-radius:14px;border:1px solid var(--border);display:block}
+@media(max-width:600px){
+.proj-gallery{grid-template-columns:1fr}
+.proj-gallery img{height:200px}
+}
 
 /* AI chat popup */
 .chat-pop.ai-chat{width:min(370px,calc(100vw - 32px));padding:0;overflow:hidden;display:flex;flex-direction:column}
