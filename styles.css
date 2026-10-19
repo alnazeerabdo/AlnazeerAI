@@ -171,6 +171,7 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .socials{display:flex;gap:8px}
 .socials a{width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid var(--border);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--black);transition:all .35s var(--ease)}
 .socials a:hover{background:var(--black);border-color:var(--black);color:#fff;transform:translateY(-3px);box-shadow:var(--shadow-sm)}
+.socials a svg{width:17px;height:17px;fill:currentColor;display:block}
 
 /* Contact */
 .contact-box{background:linear-gradient(180deg,var(--ink),var(--black));color:#fff;border-radius:26px;padding:44px;text-align:center;border:1px solid var(--black)}
@@ -369,8 +370,17 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .dots span:nth-child(3){animation-delay:.4s}
 @keyframes blink{0%,60%,100%{opacity:.2}30%{opacity:1}}
 /* Project thumbnail cover */
-.proj-cover{background:#fff;border:1px solid var(--border);border-radius:14px;height:130px;display:grid;place-items:center;margin-bottom:14px;overflow:hidden;padding:14px}
-.proj-cover img{max-height:100%;width:auto;max-width:100%;object-fit:contain;display:block}
+.proj-cover{background:#fff;border:1px solid var(--border);border-radius:14px;height:150px;display:block;margin-bottom:14px;overflow:hidden;padding:0}
+.proj-cover img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+/* Project title as link to details */
+.card h3 a{color:inherit;transition:color .35s var(--ease)}
+.card h3 a:hover{color:var(--gold-deep)}
+.card.dark h3 a:hover{color:var(--gold)}
+/* Gallery variants */
+.proj-gallery.two{grid-template-columns:repeat(2,1fr)}
+.proj-gallery.portrait{grid-template-columns:repeat(4,1fr)}
+.proj-gallery.portrait img{height:280px;object-fit:contain;background:var(--gray-soft);padding:6px}
+@media(max-width:900px){.proj-gallery.portrait{grid-template-columns:repeat(2,1fr)}}
 /* Project gallery (real store shots) */
 .proj-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
 .proj-gallery img{width:100%;height:170px;object-fit:cover;border-radius:14px;border:1px solid var(--border);display:block}
