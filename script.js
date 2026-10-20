@@ -386,7 +386,7 @@
     function linkify(s) {
       var e = esc(s);
       e = e.replace(/https?:\/\/[^\s<]+/g, function (u) { return '<a href="' + u + '" target="_blank" rel="noopener">رابط</a>'; });
-      e = e.replace(/((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software)\.html[^\s<]*)/g, '<a href="$1">هنا</a>');
+      e = e.replace(/((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build)\.html[^\s<]*)/g, '<a href="$1">هنا</a>');
       return e;
     }
     function add(cls, html) {
