@@ -445,4 +445,25 @@
     if (chatFab) chatFab.addEventListener('click', function () { setTimeout(greet, 350); });
     greet();
   })();
+
+  /* ===== AI assistant nudge =====
+     بعد بقاء الزائر على الموقع فترة، نعرض تلميحاً صغيراً يشرح فائدة المساعد الذكي */
+  (function () {
+    if (!chatFab) return;
+    var tip = document.createElement('div');
+    tip.className = 'ai-tip';
+    tip.setAttribute('role', 'status');
+    tip.textContent = 'تحتاج مساعدة؟ المساعد الذكي يرد عليك فوراً';
+    document.body.appendChild(tip);
+    var shown = false;
+    function hideTip() { tip.classList.remove('show'); }
+    chatFab.addEventListener('click', hideTip);
+    setTimeout(function () {
+      if (chatPop && chatPop.classList.contains('open')) return;
+      if (shown) return;
+      shown = true;
+      tip.classList.add('show');
+      setTimeout(hideTip, 9000);
+    }, 12000);
+  })();
 })();
