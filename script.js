@@ -199,12 +199,12 @@
           if (noteEl) noteEl.textContent = '';
         });
       }
-      if (!name || !phone || !email || !work || !problem || !size) {
+      if (!name || !phone || !work || !problem || !size) {
         say('يرجى تعبئة جميع الحقول المطلوبة حتى أجهز لك الاستشارة بشكل صحيح.', false);
         return;
       }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        say('يرجى إدخال بريد إلكتروني صحيح.', false);
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        say('البريد الإلكتروني غير صحيح — اتركه فارغاً إن لم ترغب في تعبئته.', false);
         return;
       }
       // إرسال إلى Google Form إن كان مفعّلاً
