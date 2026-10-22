@@ -1,0 +1,12 @@
+# Cloudflare Wrangler
+.wrangler/
+.dev.vars
+node_modules/
+
+# Environment / secrets
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
