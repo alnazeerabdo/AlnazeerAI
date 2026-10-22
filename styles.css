@@ -413,6 +413,10 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .ai-msg.bot{background:#fff;border:1px solid var(--border);align-self:flex-start}
 .ai-msg.user{background:var(--black);color:#fff;align-self:flex-end}
 .ai-msg.bot a{color:var(--gold-deep);font-weight:700}
+.ai-msg p{margin:0 0 8px}
+.ai-msg p:last-child{margin-bottom:0}
+.ai-msg p.typing::after{content:"";display:inline-block;width:2px;height:1.05em;background:var(--gold);margin-inline-start:3px;vertical-align:-2px;animation:aiBlink .9s steps(2,start) infinite}
+@keyframes aiBlink{0%,50%{opacity:1}51%,100%{opacity:0}}
 .ai-typing{opacity:.65}
 .ai-chips{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px 0}
 .ai-chips .chip{font-size:12px;padding:7px 13px}

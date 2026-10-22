@@ -1,0 +1,33 @@
+# ============================================================
+# مساعد النذير — Cloudflare Worker config
+# ------------------------------------------------------------
+# Deploy:
+#   cd worker
+#   npx wrangler login
+#   npx wrangler secret put GROQ_KEY      # your Groq API key
+#   npx wrangler deploy
+#
+# Worker name must stay "alnazeerai" to keep the current URL:
+#   https://alnazeerai.alnzyrbdalmnm90.workers.dev/
+# (that URL is hardcoded in script.js -> AI_WORKER_URL)
+#
+# After deploying, test with:
+#   curl -X POST https://alnazeerai.alnzyrbdalmnm90.workers.dev/ \
+#        -H "Content-Type: application/json" \
+#        -d '{"messages":[{"role":"user","content":"ما خدماتك؟"}]}'
+# ============================================================
+
+name = "alnazeerai"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# --- Vars (uncomment and edit to lock the site down) ---
+# [vars]
+# ALLOWED_ORIGINS = "https://yourdomain.com,https://www.yourdomain.com"
+
+# --- Optional: per-IP rate limiting (create the KV namespace first) ---
+#   npx wrangler kv namespace create RATE_LIMIT
+#   then paste the returned id below.
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT"
+# id = "<your-kv-namespace-id>"

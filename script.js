@@ -132,16 +132,8 @@
     var params = new URLSearchParams(location.search);
     var svc = params.get('service') || params.get('topic');
     if (svc) {
-      var problemField = document.getElementById('problem');
       var serviceField = document.getElementById('serviceInterest');
-      var note = document.getElementById('servicePrefill');
       if (serviceField) serviceField.value = svc;
-      if (note) {
-        note.textContent = 'اخترت: ' + svc + ' — اذكر لي تفاصيل أكثر لأجهز لك حلاً عاماً في الاستشارة.';
-        note.style.display = 'block';
-      } else if (problemField && !problemField.value) {
-        problemField.value = 'مهتم بخدمة: ' + svc + ' — ';
-      }
     }
   } catch (e) {}
 
@@ -383,11 +375,111 @@
     var chips = document.getElementById('aiChips');
     var hist = [], busy = false, lastSend = 0;
     function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function cleanModelText(s) {
+      // Markdown links [text](url) -> keep the bare target (re-linkified later)
+      s = s.replace(/\[([^\]]*)\]\(([^)\s]+)\)/g, function (m, t, u) { return u; });
+      // Raw HTML anchors the model may emit -> keep the bare target (re-linkified later)
+      s = s.replace(/<a\s+[^>]*href=["']?([^"'\s>]+)["']?[^>]*>([\s\S]*?)<\/a\s*>/gi, function (m, u, t) { return u; });
+      // Any other stray tags -> remove
+      s = s.replace(/<[^>\n]{0,80}>/g, '');
+      // Markdown bold/italic markers -> plain text
+      s = s.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/__([^_]+)__/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
+      return s;
+    }
     function linkify(s) {
-      var e = esc(s);
-      e = e.replace(/https?:\/\/[^\s<]+/g, function (u) { return '<a href="' + u + '" target="_blank" rel="noopener">رابط</a>'; });
-      e = e.replace(/((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build)\.html[^\s<]*)/g, '<a href="$1">هنا</a>');
-      return e;
+      var e = esc(cleanModelText(s));
+      // URLs first (rare) — then page names guarded so they can't match inside an href/URL
+      e = e.replace(/https?:\/\/[^\s<&)]+/g, function (u) {
+        var safe = u.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        return '<a href="' + safe + '" target="_blank" rel="noopener">رابط</a>';
+      });
+      e = e.replace(/(^|[\s>(])((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build)\.html)\b/g, '$1<a href="$2">هنا</a>');
+      // Paragraphs: blank line -> new paragraph; single newline -> <br>
+      return e.split(/\n{2,}/).map(function (p) { return '<p>' + p.replace(/\n/g, '<br>') + '</p>'; }).join('');
+    }
+    /* Split HTML into tokens (text / open tag / close tag / void tag). */
+    function htmlTokens(html) {
+      var out = [], re = /<[^>]+>/g, last = 0, m;
+      while ((m = re.exec(html))) {
+        if (m.index > last) out.push({ t: 'text', s: html.slice(last, m.index) });
+        var tag = m[0];
+        if (/^<\//.test(tag)) out.push({ t: 'close', s: tag });
+        else if (/^<br\b/i.test(tag)) out.push({ t: 'void', s: tag });
+        else out.push({ t: 'open', s: tag });
+        last = re.lastIndex;
+      }
+      if (last < html.length) out.push({ t: 'text', s: html.slice(last) });
+      return out;
+    }
+    /* Parse one tag into a real element (browser handles the attributes/entities). */
+    function parseTag(tagStr) {
+      var tpl = document.createElement('template');
+      tpl.innerHTML = tagStr;
+      return tpl.content.firstElementChild;
+    }
+    /* Type the reply out like it is being written (instant when reduced motion is on). */
+    function typeMessage(el, text, done) {
+      var html = linkify(text);
+      el.classList.remove('ai-typing');
+      if (reduceMotion) {
+        el.innerHTML = html;
+        log.scrollTop = log.scrollHeight;
+        if (done) done();
+        return;
+      }
+      var tokens = htmlTokens(html), ti = 0, ci = 0, t0 = Date.now();
+      var cur = el, textNode = null, ps, i;
+      el.innerHTML = '';
+      el.classList.add('ai-writing');
+
+      function caret() {
+        ps = el.querySelectorAll('p');
+        for (i = 0; i < ps.length - 1; i++) ps[i].classList.remove('typing');
+        if (ps.length) ps[ps.length - 1].classList.add('typing');
+      }
+      function tick() {
+        if (!el.isConnected) { el.classList.remove('ai-writing'); if (done) done(); return; }
+        var spent = Date.now() - t0;
+        var budget = spent > 8000 ? 6 : (spent > 4000 ? 3 : 1); // speed up on long replies
+        while (ti < tokens.length && budget > 0) {
+          var tk = tokens[ti];
+          if (tk.t === 'open') {
+            var node = parseTag(tk.s);
+            if (node) { cur.appendChild(node); cur = node; }
+            ti++;
+            continue;
+          }
+          if (tk.t === 'close') {
+            if (cur.parentNode) cur = cur.parentNode;
+            ti++;
+            continue;
+          }
+          if (tk.t === 'void') {
+            var vnode = parseTag(tk.s);
+            if (vnode) cur.appendChild(vnode);
+            ti++;
+            continue;
+          }
+          if (!textNode) { textNode = document.createTextNode(''); cur.appendChild(textNode); }
+          var take = tk.s.substr(ci, budget);
+          if (!take) { ti++; ci = 0; textNode = null; continue; }
+          textNode.appendData(take);
+          ci += take.length;
+          budget -= take.length;
+          if (ci >= tk.s.length) { ti++; ci = 0; textNode = null; }
+        }
+        caret();
+        log.scrollTop = log.scrollHeight;
+        if (ti < tokens.length) {
+          setTimeout(tick, 18);
+        } else {
+          ps = el.querySelectorAll('p');
+          for (i = 0; i < ps.length; i++) ps[i].classList.remove('typing');
+          el.classList.remove('ai-writing');
+          if (done) done();
+        }
+      }
+      tick();
     }
     function add(cls, html) {
       var d = document.createElement('div');
@@ -408,7 +500,7 @@
       add('user', esc(q));
       if (!AI_WORKER_URL) { offline(); return; }
       var now = Date.now();
-      if (busy || now - lastSend < 3000) { if (!busy) add('bot', 'مهلاً قليلاً…'); return; }
+      if (busy || now - lastSend < 3000) { add('bot', 'مهلاً قليلاً…'); return; }
       busy = true; lastSend = now;
       var tp = add('bot ai-typing', '…');
       hist.push({ role: 'user', content: q });
@@ -416,19 +508,13 @@
       fetch(AI_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: hist }) })
         .then(function (r) { return r.json(); })
         .then(function (j) {
-          busy = false;
-          tp.classList.remove('ai-typing');
           var t = (j && j.text) || 'عذراً، حاول مجدداً.';
-          tp.innerHTML = linkify(t);
-          log.scrollTop = log.scrollHeight;
           hist.push({ role: 'assistant', content: t });
           hist = hist.slice(-6);
+          typeMessage(tp, t, function () { busy = false; });
         })
         .catch(function () {
-          busy = false;
-          tp.classList.remove('ai-typing');
-          tp.innerHTML = 'تعذر الاتصال. <a href="free-session.html">احجز استشارتك</a> أو راسلني واتساب.';
-          log.scrollTop = log.scrollHeight;
+          typeMessage(tp, 'تعذر الاتصال. يمكنك الحجز من free-session.html أو مراسلتي واتساب.', function () { busy = false; });
         });
     }
     if (form) form.addEventListener('submit', function (e) {

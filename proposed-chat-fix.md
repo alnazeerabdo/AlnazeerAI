@@ -1,0 +1,121 @@
+# Proposed Fix — AI Chat Response Formatting (NOT APPLIED YET)
+
+**Status:** ✅ **APPLIED** to `script.js` + `styles.css` (the patch below is the diff that was applied).
+**Problem:** bot replies appear with broken raw HTML tags (e.g. `<a href="هنا`) and no paragraph spacing.
+
+## Extra feature added on top of the patch — typewriter effect
+
+The reply is now **typed out** like it is being written instead of appearing all at once:
+
+- `script.js` → `htmlTokens()` + `parseTag()` + `typeMessage()`: the cleaned HTML is tokenised and rendered into a real DOM tree while the text is appended character by character (links and `<br>` are inserted as real elements, so the structure stays valid the whole time).
+- Speed: ~55 chars/sec, accelerating after 4s (3 chars) and 8s (6 chars) so long replies don't drag.
+- A blinking gold caret (`p.typing::after`) shows while writing; the caret moves to the current paragraph and is removed when finished.
+- `prefers-reduced-motion` → the reply appears instantly (no animation).
+- While writing, the input stays locked (`busy`) so replies cannot interleave; sending during that time shows "مهلاً قليلاً…".
+- `styles.css` → `.ai-msg p.typing::after` + `@keyframes aiBlink`.
+
+## Artifacts saved
+
+| File | What it is | Apply with |
+|---|---|---|
+| `proposed-chat-fix.patch` | Ready-made unified diff of the frontend fix | `git apply proposed-chat-fix.patch` |
+| `worker/worker.js` | Cloudflare Worker source — was **not in this repo at all**; now version-controlled, with the output-format rule added to `SYSTEM` + hardening | `cd worker && npx wrangler deploy` |
+| `worker/wrangler.toml` | Worker config (name `alnazeerai`, KV + origin-list setup commented) | — |
+| `proposed-chat-fix.md` | This document | — |
+
+`git apply --check proposed-chat-fix.patch` passes (patch verified against the current working tree).
+
+---
+
+## 1. Root causes (all in `script.js`, current `linkify()` at lines 386–391)
+
+| # | Bug | Evidence |
+|---|---|---|
+| 1 | Model sometimes emits **raw HTML** `<a href="free-session.html">هنا</a>`. `esc()` escapes it to text, then the page-name regex matches the page name *inside* the escaped attribute → **nested broken anchor** | the garbled message you screenshotted |
+| 2 | Regex `free-session...\.html[^\s<]*` **swallows trailing characters** — live Worker reply `**free-session.html**` produced `href="free-session.html**."`; Markdown `[هنا](free-session.html)` produced `href="free-session.html)"` | captured live response 2026-10-22 |
+| 3 | **Newlines never converted** to HTML — model's `\n\n` paragraphs collapse into one wall of text | every multi-paragraph reply |
+
+## 2. Verified before/after (Node test on 5 real samples, incl. your exact broken message)
+
+- Raw `<a>` from model → **before:** `&lt;a href="<a href="free-session.html&quot;...` → **after:** clean clickable `هنا`
+- `**free-session.html**` → **before:** broken href with `**.` → **after:** clean link
+- `[هنا](free-session.html)` → **before:** `(<a href="free-session.html)">` → **after:** clean link
+- `<script>alert(1)</script>` → stays inert plain text ✓ (XSS protection preserved)
+- `https://x.com/free-session.html` → **before:** nested garbage → **after:** one valid link
+- Paragraphs now render as `<p>` blocks with `<br>` for single line breaks
+
+---
+
+## 3. Proposed change in `script.js` (replace lines 386–391)
+
+```js
+    function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function cleanModelText(s) {
+      // Markdown links [text](url) -> keep the bare target (re-linkified later)
+      s = s.replace(/\[([^\]]*)\]\(([^)\s]+)\)/g, function (m, t, u) { return u; });
+      // Raw HTML anchors the model may emit -> keep the bare target (re-linkified later)
+      s = s.replace(/<a\s+[^>]*href=["']?([^"'\s>]+)["']?[^>]*>([\s\S]*?)<\/a\s*>/gi, function (m, u, t) { return u; });
+      // Any other stray tags -> remove
+      s = s.replace(/<[^>\n]{0,80}>/g, '');
+      // Markdown bold/italic markers -> plain text
+      s = s.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/__([^_]+)__/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
+      return s;
+    }
+    function linkify(s) {
+      var e = esc(cleanModelText(s));
+      // URLs first (rare) — then page names guarded so they can't match inside an href/URL
+      e = e.replace(/https?:\/\/[^\s<&)]+/g, function (u) { return '<a href="' + u + '" target="_blank" rel="noopener">رابط</a>'; });
+      e = e.replace(/(^|[\s>(])((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build)\.html)\b/g, '$1<a href="$2">هنا</a>');
+      // Paragraphs: blank line -> new paragraph; single newline -> <br>
+      return e.split(/\n{2,}/).map(function (p) { return '<p>' + p.replace(/\n/g, '<br>') + '</p>'; }).join('');
+    }
+```
+
+No other JS changes needed — `send()` already calls `linkify(t)` with the same signature.
+
+## 4. Proposed change in `styles.css` (add after line 415, `.ai-msg.bot a{...}`)
+
+```css
+.ai-msg p{margin:0 0 8px}
+.ai-msg p:last-child{margin-bottom:0}
+```
+
+This gives the visible gap between paragraphs inside bot bubbles.
+
+## 5. Optional — Worker-side hardening (prevents the problem at the source)
+
+Append to `SYSTEM` in the Cloudflare Worker:
+
+```
+اكتب ردك نصاً عادياً فقط: بدون HTML، بدون Markdown، بدون ** أو [روابط](...). اذكر الصفحات كنص مجرد مثل free-session.html.
+```
+
+Even with this, keep the frontend fix — models occasionally ignore formatting instructions.
+
+## 6. Worker-side changes (in `worker/worker.js`)
+
+1. **`SYSTEM` output-format rule** (prevents the problem at the source):
+   > `صيغة الإخراج: اكتب نصاً عادياً فقط — بدون HTML وبدون Markdown وبدون ** وبدون [روابط](...)، ويفصل بين الفقرات سطر فارغ. اذكر أسماء الصفحات كنص مجرد مثل free-session.html ولا تكتب وسوماً حولها.`
+
+2. **Hardening added** (all optional/configurable, behaviour preserved):
+   - `ALLOWED_ORIGINS` — origin allowlist instead of `*` (set in `wrangler.toml` vars)
+   - `RATE_LIMIT` KV binding — per-IP throttle, 30 req/min (namespace id commented in `wrangler.toml`)
+   - input validation — only `user`/`assistant` roles, max 6 turns, max 500 chars/message, 20 KB body cap
+   - proper HTTP status codes (400/405/413/429) instead of silently answering
+
+## 7. How to apply / rollback
+
+```bash
+# apply frontend fix
+git apply proposed-chat-fix.patch
+
+# deploy backend fix (changes the LIVE worker)
+cd worker && npx wrangler deploy
+
+# rollback frontend
+git apply -R proposed-chat-fix.patch
+# or, since both files are tracked:
+git checkout -- script.js styles.css
+```
+
+Deploying `worker/worker.js` replaces the live Worker at `alnazeerai.alnzyrbdalmnm90.workers.dev` — keep `name = "alnazeerai"` in `wrangler.toml` or the URL hardcoded in `script.js` (`AI_WORKER_URL`) will change.

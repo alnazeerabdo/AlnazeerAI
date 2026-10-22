@@ -1,0 +1,46 @@
+diff --git a/script.js b/script.js
+index 1f5276b..6bcad92 100644
+--- a/script.js
++++ b/script.js
+@@ -383,11 +383,24 @@
+     var chips = document.getElementById('aiChips');
+     var hist = [], busy = false, lastSend = 0;
+     function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
++    function cleanModelText(s) {
++      // Markdown links [text](url) -> keep the bare target (re-linkified later)
++      s = s.replace(/\[([^\]]*)\]\(([^)\s]+)\)/g, function (m, t, u) { return u; });
++      // Raw HTML anchors the model may emit -> keep the bare target (re-linkified later)
++      s = s.replace(/<a\s+[^>]*href=["']?([^"'\s>]+)["']?[^>]*>([\s\S]*?)<\/a\s*>/gi, function (m, u, t) { return u; });
++      // Any other stray tags -> remove
++      s = s.replace(/<[^>\n]{0,80}>/g, '');
++      // Markdown bold/italic markers -> plain text
++      s = s.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/__([^_]+)__/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
++      return s;
++    }
+     function linkify(s) {
+-      var e = esc(s);
+-      e = e.replace(/https?:\/\/[^\s<]+/g, function (u) { return '<a href="' + u + '" target="_blank" rel="noopener">رابط</a>'; });
+-      e = e.replace(/((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build)\.html[^\s<]*)/g, '<a href="$1">هنا</a>');
+-      return e;
++      var e = esc(cleanModelText(s));
++      // URLs first (rare) — then page names guarded so they can't match inside an href/URL
++      e = e.replace(/https?:\/\/[^\s<&)]+/g, function (u) { return '<a href="' + u + '" target="_blank" rel="noopener">رابط</a>'; });
++      e = e.replace(/(^|[\s>(])((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build)\.html)\b/g, '$1<a href="$2">هنا</a>');
++      // Paragraphs: blank line -> new paragraph; single newline -> <br>
++      return e.split(/\n{2,}/).map(function (p) { return '<p>' + p.replace(/\n/g, '<br>') + '</p>'; }).join('');
+     }
+     function add(cls, html) {
+       var d = document.createElement('div');
+diff --git a/styles.css b/styles.css
+index a01a0b3..96e9979 100644
+--- a/styles.css
++++ b/styles.css
+@@ -413,6 +413,8 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
+ .ai-msg.bot{background:#fff;border:1px solid var(--border);align-self:flex-start}
+ .ai-msg.user{background:var(--black);color:#fff;align-self:flex-end}
+ .ai-msg.bot a{color:var(--gold-deep);font-weight:700}
++.ai-msg p{margin:0 0 8px}
++.ai-msg p:last-child{margin-bottom:0}
+ .ai-typing{opacity:.65}
+ .ai-chips{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px 0}
+ .ai-chips .chip{font-size:12px;padding:7px 13px}
