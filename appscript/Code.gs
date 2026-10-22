@@ -34,21 +34,42 @@ function getSheet(ss, name, headers) {
 
 /**
  * تبويب المحادثات: إذا كان التبويب موجوداً بترتيب أعمدة قديم (وقت/سؤال/رد)
- * يُؤرشف ويُنشأ تبويب جديد بنفس الاسم بالتسليم الجديد.
+ * يُنسخ محتواه إلى تبويب مؤرشف ثم يُحذف الأصلي ويُنشأ تبويب جديد بالتسليم الجديد.
+ * ملاحظة: لا يوجد renameSheet في Apps Script — نستخدم النسخ والحذف.
  */
 function ensureChatSheet(ss, headers) {
   var sh = ss.getSheetByName(CHAT_TAB);
-  if (sh) {
-    var current = sh.getRange(1, 1, 1, headers.length).getValues()[0]
-      .map(function (x) { return String(x).trim(); });
-    var same = headers.every(function (v, i) { return current[i] === v; });
-    if (same) return sh;
-    var oldName = CHAT_TAB + ' (قديم)';
-    var n = 2;
-    while (ss.getSheetByName(oldName)) { oldName = CHAT_TAB + ' (قديم ' + n + ')'; n++; }
-    ss.renameSheet(sh, oldName);
+  if (!sh) return newChatTab(ss, headers);
+
+  var current = sh.getRange(1, 1, 1, headers.length).getValues()[0]
+    .map(function (x) { return String(x).trim(); });
+  var same = headers.every(function (v, i) { return current[i] === v; });
+  if (same) return sh;
+
+  try {
+    var archive = ss.insertSheet(CHAT_TAB + ' (قديم)');
+    var last = sh.getLastRow();
+    var cols = Math.max(sh.getLastColumn(), 3);
+    if (last > 0) {
+      var values = sh.getRange(1, 1, last, cols).getValues();
+      archive.getRange(1, 1, values.length, cols).setValues(values);
+    }
+    ss.deleteSheet(sh);
+    return newChatTab(ss, headers);
+  } catch (err) {
+    // فشل الترحيل: نكتب في تبويب بديل حتى لا تتعطل عملية التسجيل
+    var fallback = CHAT_TAB + ' (جديد)';
+    var alt = ss.getSheetByName(fallback);
+    if (!alt) {
+      alt = ss.insertSheet(fallback);
+      alt.appendRow(headers);
+    }
+    return alt;
   }
-  sh = ss.insertSheet(CHAT_TAB);
+}
+
+function newChatTab(ss, headers) {
+  var sh = ss.insertSheet(CHAT_TAB);
   sh.appendRow(headers);
   return sh;
 }
