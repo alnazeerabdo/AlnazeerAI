@@ -158,9 +158,9 @@ cd worker && npx wrangler deploy   # بدونه تبقى القواعد القد
 |---|---|---|
 | TPM (tokens/min) | 8000 لكل نموذج | طلب واحد ≈ 1550 token (prompt 1442 + output) ⇒ ~5 طلبات/دقيقة/نموذج |
 | ITPM (input tokens/min) | 7000 | الـ prompt يُعاد في كل محاولة ⇒ سلسلة بديلة طويلة تستهلك الحد ×N |
-| RPM / RPD | 30 / 1000 | 30 طلباً/دقيقة كحد أقصى لكل نموذج |
+| RPM / RPD | 30 / 1000 | 30 طلباً/دقيقة و1000 طلب/يوم لكل نموذج |
 | النماذج المتاحة | `gpt-oss-120b` · `gpt-oss-20b` · `qwen3.8-27b` | **Llama لم يعد على الطبقة المجانية** (مدفوع فقط منذ 08/2026) |
-| Prompt caching | مدعوم على gpt-oss | التوكنات المخزّنة لا تُحسب ضمن الحد (88% من الـ prompt) |
+| Prompt caching | مدعوم على gpt-oss | التوكنات المخزّنة لا تُحسب ضمن الحد |
 
 **الإصلاحات التي نتجت عن ذلك (في `worker/worker.js`):**
 
@@ -177,4 +177,6 @@ cd worker && npx wrangler deploy   # بدونه تبقى القواعد القد
 
 ### 8.6 حالة النشر
 
-✅ نُشر على `alnazeerai.alnzyrbdalmnm90.workers.dev` (Version `147f13f4-670c-4e73-8973-907dc5410271`) — `GROQ_KEY` محفوظ كسرRET ويبقى بعد النشر.
+✅ نُشر على `alnazeerai.alnzyrbdalmnm90.workers.dev` (آخر نسخة: `9b126613-3d3b-4acf-9bfc-8b6d14ff950a`) — `GROQ_KEY` محفوظ كـ secret ويبقى بعد النشر.
+
+⚠️ حد RPD = 1000 طلب/يوم على مستوى حساب Groq — كل رسالة في الشات تستهلك طلباً واحداً.
