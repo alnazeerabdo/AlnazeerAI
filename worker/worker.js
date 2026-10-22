@@ -102,6 +102,8 @@ export default {
       let parsed;
       try { parsed = JSON.parse(raw); } catch (e) { parsed = null; }
       const messages = sanitizeMessages(parsed && parsed.messages);
+      const session = String((parsed && parsed.session) || '').slice(0, 40);
+      const page = String((parsed && parsed.page) || '').slice(0, 120);
       if (!messages.length) {
         return new Response(JSON.stringify({ text: FALLBACK }), { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } });
       }
@@ -147,6 +149,8 @@ export default {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
           log: 'chat',
+          session: session,
+          page: page,
           question: ((lastUser && lastUser.content) || '').slice(0, 1000),
           answer: text.slice(0, 2000)
         })

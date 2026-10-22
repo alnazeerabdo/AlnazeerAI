@@ -374,6 +374,20 @@
     var form = document.getElementById('aiForm'), inp = document.getElementById('aiText');
     var chips = document.getElementById('aiChips');
     var hist = [], busy = false, lastSend = 0;
+    /* معرّف المحادثة: ثابت لكل جلسة/تبويب، يُرسل مع كل رسالة ليُفرَّق بين المحادثات في السجل. */
+    function sessionId() {
+      var k = 'alnazeer_chat_session';
+      try {
+        var s = sessionStorage.getItem(k);
+        if (!s) {
+          s = 'c-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+          sessionStorage.setItem(k, s);
+        }
+        return s;
+      } catch (e) {
+        return 'c-' + Date.now().toString(36);
+      }
+    }
     function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
     function cleanModelText(s) {
       // Markdown links [text](url) -> keep the bare target (re-linkified later)
@@ -505,7 +519,7 @@
       var tp = add('bot ai-typing', '…');
       hist.push({ role: 'user', content: q });
       hist = hist.slice(-6);
-      fetch(AI_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: hist }) })
+      fetch(AI_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: hist, session: sessionId(), page: location.pathname }) })
         .then(function (r) { return r.json(); })
         .then(function (j) {
           var t = (j && j.text) || 'عذراً، حاول مجدداً.';

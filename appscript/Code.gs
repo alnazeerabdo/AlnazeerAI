@@ -3,29 +3,61 @@
  * يستقبل: نموذج الحجز + نموذج التواصل + سجل محادثات المساعد الذكي
  *
  * routing:
- *   log=chat              -> tab "محادثات AI"      (بدون إيميل)
- *   form=booking          -> tab "استشارات"       (مع إيميل)
- *   form=contact          -> tab "تواصل"           (مع إيميل حسب EMAIL_ON_CONTACT)
+ *   log=chat     -> tab "محادثات AI"  (بدون إيميل) — مفصول بمعرّف المحادثة
+ *   form=booking -> tab "استشارات"   (مع إيميل)
+ *   form=contact -> tab "تواصل"       (مع إيميل حسب EMAIL_ON_CONTACT)
  */
 
 const NOTIFY_EMAIL = 'alnzyrbdalmnm90@gmail.com';
 const EMAIL_ON_CONTACT = true;   // اجعلها false لإيقاف إيميل نموذج التواصل أيضاً
 const CHAT_TAB = 'محادثات AI';
+const ONE_TAB_PER_CHAT = false;  // true = تبويب مستقل لكل محادثة بدل الفواصل داخل تبويب واحد
 
-// ضع معرّف الـ Spreadsheet هنا إذا كان السكربت مستقلاً (غير مرتبط بملف):
-// الملف > المعرّف: انسخه من الرابط /spreadsheets/d/XXXXXXXX/edit
+// إذا كان السكربت مستقلاً (غير مرتبط بملف Google Sheet):
+// ضع معرّف الملف هنا — انسخه من رابط الملف: /spreadsheets/d/XXXXXXXX/edit
 const SHEET_ID = '';
+
+const CHAT_HEADERS = ['الوقت', 'المحادثة', 'السؤال', 'الرد', 'الصفحة'];
 
 function json(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
+// يجلب التبويب أو ينشئه (مع عناوين الأعمدة فقط عند الإنشاء)
 function getSheet(ss, name, headers) {
   var sh = ss.getSheetByName(name);
   if (sh) return sh;
   sh = ss.insertSheet(name);
   if (headers && headers.length) sh.appendRow(headers);
   return sh;
+}
+
+/**
+ * تبويب المحادثات: إذا كان التبويب موجوداً بترتيب أعمدة قديم (وقت/سؤال/رد)
+ * يُؤرشف ويُنشأ تبويب جديد بنفس الاسم بالتسليم الجديد.
+ */
+function ensureChatSheet(ss, headers) {
+  var sh = ss.getSheetByName(CHAT_TAB);
+  if (sh) {
+    var current = sh.getRange(1, 1, 1, headers.length).getValues()[0]
+      .map(function (x) { return String(x).trim(); });
+    var same = headers.every(function (v, i) { return current[i] === v; });
+    if (same) return sh;
+    var oldName = CHAT_TAB + ' (قديم)';
+    var n = 2;
+    while (ss.getSheetByName(oldName)) { oldName = CHAT_TAB + ' (قديم ' + n + ')'; n++; }
+    ss.renameSheet(sh, oldName);
+  }
+  sh = ss.insertSheet(CHAT_TAB);
+  sh.appendRow(headers);
+  return sh;
+}
+
+// آخر محادثة مسجّلة (للكشف عن بداية محادثة جديدة)
+function lastSession(sh) {
+  var last = sh.getLastRow();
+  if (last < 2) return '';
+  return String(sh.getRange(last, 2).getValue() || '').trim();
 }
 
 function doPost(e) {
@@ -35,14 +67,31 @@ function doPost(e) {
     if (!ss && SHEET_ID) ss = SpreadsheetApp.openById(SHEET_ID);
     if (!ss) return json({ ok: false, error: 'no active spreadsheet' });
 
-    // 1) سجل محادثات المساعد الذكي — بدون إيميل
+    // ===== 1) سجل محادثات المساعد الذكي — بدون إيميل =====
     if (p.log === 'chat') {
-      var chat = getSheet(ss, CHAT_TAB, ['الوقت', 'السؤال', 'الرد']);
-      chat.appendRow([new Date(), p.question || '', p.answer || '']);
-      return json({ ok: true, sheet: ss.getUrl(), tab: chat.getName(), row: chat.getLastRow(), emailed: false });
+      var sid = String(p.session || '').slice(0, 40);
+      var label = sid ? sid.replace(/^c-/, '#') : '#غير-معروف';
+      var page = String(p.page || '').slice(0, 120);
+      var chat;
+
+      if (ONE_TAB_PER_CHAT) {
+        // تبويب مستقل لكل محادثة
+        var tabName = 'محادثة ' + label;
+        chat = ss.getSheetByName(tabName) || ss.insertSheet(tabName);
+        if (chat.getLastRow() === 0) chat.appendRow(CHAT_HEADERS);
+      } else {
+        // تبويب واحد + سطر فاصل عند بداية كل محادثة
+        chat = ensureChatSheet(ss, CHAT_HEADERS);
+        if (lastSession(chat) !== label) {
+          chat.appendRow([new Date(), label, '— بداية محادثة جديدة —', '', page]);
+        }
+      }
+
+      chat.appendRow([new Date(), label, p.question || '', p.answer || '', page]);
+      return json({ ok: true, sheet: ss.getUrl(), tab: chat.getName(), row: chat.getLastRow(), session: label, emailed: false });
     }
 
-    // 2) نموذج الحجز / نموذج التواصل
+    // ===== 2) نموذج الحجز ونموذج التواصل — مع الإيميل =====
     var isContact = (p.form === 'contact');
     var subject, body, sheet, row;
 
@@ -72,7 +121,7 @@ function doPost(e) {
   }
 }
 
-// فحص سريع للتأكد أن النشر يعمل: افتح رابط /exec في المتصفح
+// فحص سريع: افتح رابط /exec في المتصفح
 function doGet() {
   return json({ ok: true, service: 'النذير — استقبال النماذج والمحادثات' });
 }
