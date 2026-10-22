@@ -402,11 +402,24 @@
     }
     function linkify(s) {
       var e = esc(cleanModelText(s));
-      // URLs first (rare) — then page names guarded so they can't match inside an href/URL
+      // 1) استخرج الروابط أولاً (بـ placeholder) حتى لا تُمسّ أرقام الواتساب داخل الـ href
+      var urls = [];
       e = e.replace(/https?:\/\/[^\s<&)]+/g, function (u) {
-        var safe = u.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        return '<a href="' + safe + '" target="_blank" rel="noopener">رابط</a>';
+        u = u.replace(/[.,;:،؟!]+$/, '');
+        urls.push(u);
+        return '\u0000' + (urls.length - 1) + '\u0000';
       });
+      // 2) رقم الواتساب يعرض كرابط يفتح واتساب مباشرة (بدل رقم)
+      e = e.replace(/(?:\+\s*)?249[\s-]?117[\s-]?148[\s-]?664(?!\d)/g,
+        '<a href="https://wa.me/249117148664" target="_blank" rel="noopener">واتساب</a>');
+      // 3) رجّع الروابط (رابط واتساب يُكتب «واتساب» بدل «رابط»)
+      e = e.replace(/\u0000(\d+)\u0000/g, function (_, i) {
+        var u = urls[+i];
+        var safe = u.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        var label = /wa\.me|whatsapp/i.test(u) ? 'واتساب' : 'رابط';
+        return '<a href="' + safe + '" target="_blank" rel="noopener">' + label + '</a>';
+      });
+      // 4) أسماء الصفحات — محميّة من أن تُلتقط داخل رابط أو href
       e = e.replace(/(^|[\s>(])((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build)\.html)\b/g, '$1<a href="$2">هنا</a>');
       // Paragraphs: blank line -> new paragraph; single newline -> <br>
       return e.split(/\n{2,}/).map(function (p) { return '<p>' + p.replace(/\n/g, '<br>') + '</p>'; }).join('');
@@ -505,7 +518,7 @@
     }
     function greet() {
       if (log.children.length) return;
-      add('bot', 'أهلاً بك! أنا المساعد الذكي. اسألني عن <strong>الخدمات</strong>، <strong>الأسعار</strong>، أو <strong>حجز الاستشارة المجانية</strong>. <small style="color:#8E94A0">(قد تُحفظ المحادثة لتحسين الخدمة)</small>');
+      add('bot', 'أهلاً بك، أنا مساعد الذكاء الاصطناعي الخاص بالنذير، يمكنني مساعدتك في كل ما تحتاج معرفته عن الخدمات والأسعار وحجز المواعيد مع النذير.');
     }
     function offline() {
       add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="free-session.html">حجز استشارتك المجانية</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
