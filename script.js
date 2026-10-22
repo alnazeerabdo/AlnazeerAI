@@ -527,7 +527,7 @@
       add('user', esc(q));
       if (!AI_WORKER_URL) { offline(); return; }
       var now = Date.now();
-      if (busy || now - lastSend < 3000) { add('bot', 'مهلاً قليلاً…'); return; }
+      if (busy || now - lastSend < 5000) { add('bot', 'مهلاً قليلاً…'); return; }
       busy = true; lastSend = now;
       var tp = add('bot ai-typing', '…');
       hist.push({ role: 'user', content: q });
