@@ -21,13 +21,25 @@ name = "alnazeerai"
 main = "worker.js"
 compatibility_date = "2025-01-01"
 
-# --- Vars (uncomment and edit to lock the site down) ---
-# [vars]
-# ALLOWED_ORIGINS = "https://yourdomain.com,https://www.yourdomain.com"
+# --- استيراد النص الأمامي من ملف نصي قابل للتحرير ---
+# بعد تعديل worker/system.txt نفّذ: npx wrangler deploy
+rules = [
+  { type = "Text", globs = ["**/*.txt"], fallthrough = true }
+]
 
-# --- Optional: per-IP rate limiting (create the KV namespace first) ---
-#   npx wrangler kv namespace create RATE_LIMIT
-#   then paste the returned id below.
-# [[kv_namespaces]]
-# binding = "RATE_LIMIT"
-# id = "<your-kv-namespace-id>"
+# --- Vars ---
+# احظر أي موقع آخر من استخدام المساعد عبر المتصفح (لا يوقف curl، لكنه يوقف صفحات الأخطار).
+# إذا انتقلت إلى نطاق مخصص أضفه هنا بفواصل، وإلا يتوقف المساعد عن الرد.
+[vars]
+ALLOWED_ORIGINS = "https://alnazeerabdo.github.io"
+
+# --- Cloudflare Turnstile (كابتشا خفي) ---
+# الودجت: "alnazeerai-chat-v2" — نطاقات مسموح بها: github.io + workers.dev
+# المفتاح السري مضبوط كـ secret: npx wrangler secret put TURNSTILE_SECRET (تم)
+TURNSTILE_SITEKEY = "0x4AAAAAAFiAHVOaFA8sbZ2n"
+
+# --- Rate limiting عبر KV (فعّال منذ إنشاء الـ namespace) ---
+# يقيّد: 30 طلب/دقيقة/IP + 150 طلب/يوم/IP + 50 رسالة/يوم/جلسة
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "f12908835a134d30bef317f8d3e5c0d3"

@@ -6,6 +6,8 @@ node_modules/
 # Environment / secrets
 .env
 .env.local
+turnstile.json
+worker/.turnstile.json
 
 # OS
 .DS_Store

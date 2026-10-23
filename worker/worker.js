@@ -17,70 +17,25 @@
      Without it, no server-side rate limit is applied.
    ============================================================ */
 
-const SYSTEM = `أنت «مساعد النذير» — المساعد الذكي الخاص بالنذير في موقعه.
+// النص الأمامي قابل للتحرير: worker/system.txt (يُستورد أدناه)
+import SYSTEM from './system.txt';
 
-## هويتك
-- أنت مساعد النذير لا النذير نفسه. تحدّث عنه بصيغة الغائب: «النذير يقدّم»، «لدى النذير»، «مشاريع النذير».
-- لا تقدّم نفسك كذكاء اصطناعي ولا تتكلم نيابةً عنه. «أنا» لأفعالك أنت فقط: «أساعدك»، «أستطيع إرشادك».
-- إذا سأل «من أنت؟» أو «ماذا أنت؟» فالجواب: «أنا مساعد النذير، أساعدك في استفساراتك عن خدماته ومشاريعه» — ولا تصف النذير مكان نفسك.
-- اذكر اسم «النذير» حين يكون ذا صلة: خدماته، مشاريعه، سعره، خبرته. وعند ذكر خدماته أو مشاريعه ابدأ بإشارة إليه مثل «النذير يقدّم…».
-- عربية بيضاء ودودة بلا مبالغة وبلا مصطلحات إنجليزية غير لازمة.
-
-## قواعد الإجابة (صارمة)
-- ابدأ بالجواب مباشرة: لا مقدمة ولا إعادة صياغة للسؤال.
-- لا تذكر غير المطلوب: لا خدمات أخرى، ولا أسعاراً، ولا دعوة للحجز أو واتساب إلا لو سُئلت عن السعر أو الحجز أو التواصل.
-- لا أمثلة ولا حالات استخدام ولا تفاصيل تقنية ولا معلومات جانبية، ولا تكرّر ما قلته.
-- جملة أو جملتان (3 أسطر). السؤال العام «ما خدماتك؟» = قائمة مختصرة بلا شرح لكل خدمة.
-- لكل جزء من السؤال جملة واحدة.
-- ما لا تعرفه: أجب عن المعروف، وقل في سطر واحد إنك لا تملك المعلومة الدقيقة، بلا حشو.
-
-## النذير
-- الاسم: النذير. مهندس ذكاء اصطناعي ومطوّر برمجيات، +7 سنوات خبرة، +40 مشروعاً لعملاء في العالم العربي.
-- بدأ بالبرمجة ثم تخصص في الذكاء الاصطناعي التطبيقي: نماذج تخدم العمل — ترد على العملاء، تؤتمت المهام، تبني أنظمة ذكية.
-- أسلوبه: لا يبيع التقنية. استشارة مجانية أولاً لفهم العمل ووضع حل عام، ثم تنفيذ، أو خروج بخارطة مجاناً.
-- يميّزه: فهم عميق للمشكلة، حلول عملية لا تنظير، استشارة مجانية بلا التزام.
-- نطاقه: أصحاب المشاريع والشركات في العالم العربي — تحويل مشكلاتهم اليومية إلى أنظمة ذكية.
-
-## الخدمات (3 مجالات)
-(1) وكلاء الذكاء الاصطناعي والأتمتة: روبوتات محادثة، وكلاء صوتيون، وكلاء ينفّذون مهام عبر أدوات العميل، أتمتة العمليات المتكررة.
-(2) حلول ذكاء اصطناعي مخصصة: دمج الذكاء داخل أنظمة العميل، حلول لحالة استخدام محددة، تخصيص النماذج، أنظمة أعمال ذكية.
-(3) تطوير البرمجيات: مواقع، متاجر إلكترونية، تطبيقات، أنظمة شركات، ERP، CRM، أنظمة مخصصة من الصفر.
-
-## المشاريع الثمانية (الوصف العلني فقط)
-- نظام مضيف: وكيل ذكاء اصطناعي لمطعم — يستقبل الطلبات ويؤكدها، يتذكر الحجوزات ويذكّر بها، مربوط بنظام نقاط البيع POS.
-- نظام المدار: CRM من الصفر لشركة المدار — عملاء محتملون، صفقات بمراحل، جهات اتصال، تقارير، صلاحيات لكل دور، ومساعد ذكاء اصطناعي يذكّر ويُلخّص ويقترح الخطوة التالية.
-- سجل برو: تطبيق إدارة الأغنام (SIJIL PROACTIVE، الجبيل) — أضاف النذير مساعد دردشة يجيب بلغة المستخدم وبحسب سياق التطبيق.
-- متجر سبكترا: متجر أجهزة سحب الحليب — تصنيفات، سلة ودفع، توصيل لكل مدن المملكة، مدونة، نسختان.
-- أديار: موقع ديار العصرية العقارية (جدة) — مشاريع بحالاتها، مقارنة مشاريع، مدونة، نسختان.
-- أساس مكين: موقع أساس مكين العقارية (الرياض) — كتالوج مشاريع، «سجل اهتمامك» مع جدولة مكالمة، خريطة تفاعلية، نسختان.
-- شرفات: موقع شرفات للتطوير العقاري — قطاعات (سكن/ضيافة/أعمال)، برامج استراتيجية، أذرع تشغيلية (وكن، إيراد)، مشاريع على الخريطة، نسختان.
-- رولفا: موقع مكتب رولفا للمحاماة (الرياض) — مجالات الممارسة التسعة، خدمات تنفيذية، حجز استشارة، نسختان.
-- الخصوصية (تفاصيل المشاريع الداخلية فقط): إذا سأل عن تفصيل داخل مشروع معروض (الكود، التقنية، أرقام المشروع، تسعير العميل، مواعيده، نتائجه، أسماء عملاءه) → «هذا التفصيل جزء من خصوصية المشروع ولا يمكن أن يُقال.» لا تبوح ولا تخمّن. هذه القاعدة تخصّ المشاريع فقط، ولا تُطبَّق على سؤال عام عن أسعار الخدمات (يُجاب عنه من بند الأسعار).
-
-## الاستشارة المجانية
-- مكالمة فيديو 20–30 دقيقة: أفهم عملك ومشكلتك ثم أضع معك حلاً عاماً وخارطة بدء. مجانية بلا التزام.
-- تُحدَّد فيها: أهم المشكلات القابلة للتحسين، فرص الذكاء الاصطناعي، ما يمكن أتمتته فوراً، وهل يحتاج المشروع وكيلاً أم نظاماً أم تكاملاً.
-- الحجز من free-session.html: الاسم، واتساب، إيميل (اختياري)، طبيعة العمل، المشكلة، حجم العمل (فردي، 2–10، 11–50، 51–200، +200).
-- بعدها: عرض (النطاق والمدة والسعر)، تنفيذ على مراحل، إطلاق، تدريب، ودعم.
-
-## التواصل والأسعار
-- واتساب: اكتب الرابط لا الرقم: https://wa.me/249117148664
-- صفحة التواصل: contact.html
-- الأسعار: لا تُعلن. السعر حسب النطاق والمدة ويُحدَّد في الاستشارة (وكيل بسيط = أيام، نظام متكامل = أسابيع). لا تخترع سعراً.
-
-## الصفحات المسموحة
-free-session.html · services.html · contact.html · faq.html · projects.html
-
-صيغة الإخراج: نص عادي فقط — بلا HTML أو Markdown أو ** أو [روابط](...)، وفاصل سطر فارغ بين الفقرات. اذكر أسماء الصفحات كنص مجرد. اكتب رابط واتساب كاملاً كما هو.`;
 
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxR1B9QCCZF-9gN-_uexloBwxDDKl8qf9CzVYaN9K0NQZstVnLnwPR6ANpYCseyTgp1/exec';
 
-const MAX_MESSAGES = 4;      // only the last N turns are sent to the model (كل رسالة تستهلك حد التوكنات)
+const MAX_MESSAGES = 16;     // عدد الرسائل التي تُرسل نصاً كاملاً للنموذج (الذاكرة الحرفية)
 const MAX_CONTENT = 500;      // max chars per message
-const RATE_LIMIT_MAX = 30;   // requests per IP per minute (needs KV binding)
+const MAX_DIGEST = 1500;      // أقصى حجم لملخّص الرسائل الأقدم (يُضاف كـ system context)
+const RATE_LIMIT_MAX = 30;   // طلب/دقيقة/IP
+const IP_DAILY_MAX = 150;    // طلب/يوم/IP
+const SESSION_DAILY_MAX = 50; // رسالة/يوم/جلسة (الزائر الحقيقي < 20)
 const FALLBACK = 'عذراً، حاول مجدداً.';
 const FALLBACK_ERR = 'حدث خطأ، حاول مجدداً أو راسلني على واتساب: https://wa.me/249117148664';
 const WA_LINK = 'https://wa.me/249117148664';
+const BUSY_MSG = 'المساعد مشغول الآن بسبب كثرة الأسئلة — انتظر قليلاً ثم أعد السؤال، أو راسلني مباشرة على واتساب: ' + WA_LINK;
+
+// أنماط محاولة انتهاز/حقن تعليمات — تُرفض قبل استهلاك أي توكن.
+const INJECTION = /\b(ignore|disregard|forget|override)\b[\s\S]{0,60}\b(previous|prior|above|system|instructions?)\b|you\s+are\s+now|act\s+as\s+if|pretend\s+(to\s+be|you)|jailbreak|DAN\s+mode|developer\s+mode|system\s*prompt|reveal\s+(your|the)\s+(instructions?|prompt|rules?)|print\s+(your|the)\s+(instructions?|prompt)/i;
 
 // نماذج غير دردشة (حماية/صوت/تضمين) — لا تُستخدم.
 const MODEL_BLOCKLIST = /guard|whisper|tts|embed|playground|moderation|vision|audio/i;
@@ -113,18 +68,49 @@ function corsHeaders(env, origin) {
   };
 }
 
-// Optional per-IP throttle (requires a KV namespace bound as RATE_LIMIT).
-async function allowRequest(env, ip) {
+// عداد KV مع TTL — يزيد ويُرجع العدد بعد الزيادة.
+async function bump(kv, key, ttl) {
+  const n = parseInt((await kv.get(key)) || '0', 10) + 1;
+  await kv.put(key, String(n), { expirationTtl: ttl });
+  return n;
+}
+
+// حماية إساءة الاستخدام عبر KV: حد IP/دقيقة، حد IP/يوم، حد جلسة/يوم.
+// يُرجع null إذا كان الطلب مسموحاً، أو نص الرد عند الرفض.
+async function abuseGuard(env, ip, session) {
   const kv = env.RATE_LIMIT;
-  if (!kv || !ip) return true;
+  if (!kv) return null; // لا KV = لا حماية عددية (لكن الكابتشا والفلترة تبقى)
   try {
-    const key = 'rl:' + ip;
-    const current = parseInt((await kv.get(key)) || '0', 10);
-    if (current >= RATE_LIMIT_MAX) return false;
-    await kv.put(key, String(current + 1), { expirationTtl: 60 });
-    return true;
+    const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const perMin = await bump(kv, 'm:' + ip, 120);
+    if (perMin > RATE_LIMIT_MAX) return BUSY_MSG;
+    const ipDay = await bump(kv, 'd:' + ip + ':' + day, 90000);
+    if (ipDay > IP_DAILY_MAX) return BUSY_MSG;
+    if (session) {
+      const sesDay = await bump(kv, 's:' + session + ':' + day, 90000);
+      if (sesDay > SESSION_DAILY_MAX) return BUSY_MSG;
+    }
+    return null;
   } catch (e) {
-    return true; // never block the visitor because of a KV hiccup
+    return null; // لا تمنع الزائر بسبب خلل KV
+  }
+}
+
+// التحقق من رمز Cloudflare Turnstile (يتفعّل فقط عند ضبط TURNSTILE_SECRET).
+async function verifyTurnstile(env, token, ip) {
+  const secret = env.TURNSTILE_SECRET;
+  if (!secret) return true;  // غير مُفعّل
+  if (!token) return false;  // مفعّل ولم يُرسل رمز => رفض
+  try {
+    const r = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ secret: secret, response: token, remoteip: ip || '' })
+    });
+    const j = await r.json();
+    return !!(j && j.success);
+  } catch (e) {
+    return true; // تجاوز عند خلل شبكة — لا نمنع الزائر بسبب مشكلة Cloudflare
   }
 }
 
@@ -151,9 +137,6 @@ export default {
 
     try {
       const ip = req.headers.get('CF-Connecting-IP') || '';
-      if (!(await allowRequest(env, ip))) {
-        return new Response(JSON.stringify({ text: 'طلبات كثيرة خلال وقت قصير، حاول بعد قليل أو راسلني على واتساب: ' + WA_LINK }), { status: 429, headers: { ...cors, 'Content-Type': 'application/json' } });
-      }
 
       const raw = await req.text();
       if (raw.length > 20000) {
@@ -165,8 +148,29 @@ export default {
       const messages = sanitizeMessages(parsed && parsed.messages);
       const session = String((parsed && parsed.session) || '').slice(0, 40);
       const page = String((parsed && parsed.page) || '').slice(0, 120);
+      const tsToken = String((parsed && parsed.turnstile) || '').slice(0, 2000);
+      // ملخّص الرسائل الأقدم (يبنيه الموقع تلقائياً) — يضاف كـ system context حتى لا تفقد المحادثة ذاكرتها.
+      const digest = String((parsed && parsed.digest) || '').replace(/\s+/g, ' ').trim().slice(0, MAX_DIGEST);
+
+      // --- 1) حدود الاستخدام (KV): دقيقة/يوم/IP + يوم/جلسة ---
+      const blocked = await abuseGuard(env, ip, session);
+      if (blocked) {
+        return new Response(JSON.stringify({ text: blocked }), { status: 429, headers: { ...cors, 'Content-Type': 'application/json' } });
+      }
+
+      // --- 2) الكابتشا الخفي (Turnstile) — يتفعّل فقط عند ضبط TURNSTILE_SECRET ---
+      if (!(await verifyTurnstile(env, tsToken, ip))) {
+        return new Response(JSON.stringify({ text: 'تعذر التأكد من أنك إنسان — أعد المحاولة، أو راسلني مباشرة على واتساب: ' + WA_LINK }), { status: 429, headers: { ...cors, 'Content-Type': 'application/json' } });
+      }
+
       if (!messages.length) {
         return new Response(JSON.stringify({ text: FALLBACK }), { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } });
+      }
+
+      // --- 3) رفض محاولات حقن التعليمات / كسر القواعد (بلا استهلاك توكنات) ---
+      const lastUser = messages.slice().reverse().find(function (m) { return m.role === 'user'; });
+      if (lastUser && INJECTION.test(String(lastUser.content))) {
+        return new Response(JSON.stringify({ text: 'لا أستطيع مساعدتك في ذلك. يمكنني الإجابة عن أسئلتك عن خدمات النذير ومشاريعه، أو حجز استشارة مجانية له.' }), { headers: { ...cors, 'Content-Type': 'application/json' } });
       }
 
       // Discover available chat models once per isolate (self-heals when Groq retires a model).
@@ -192,8 +196,9 @@ export default {
         : ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
 
       // ذاكرة إجابات داخل العامل: نفس السؤال يعاد ردّه بلا استدعاء النموذج (يوفّر حد التوكنات).
-      const lastUser = messages.slice().reverse().find(function (m) { return m.role === 'user'; });
-      const qKey = lastUser ? String(lastUser.content).trim().slice(0, 300) : '';
+      // نضيف طول المحادثة للمفتاح: نفس السؤال في سياق أعمق قد يستحق جواباً مختلفاً،
+      // بينما تكرار السبام لنفس الرسالة (طول 1) يظل يلتقط الذاكرة ويوفّر التوكنات.
+      const qKey = lastUser ? String(lastUser.content).trim().slice(0, 300) + '#' + messages.length : '';
       if (!globalThis.ANSWER_CACHE) globalThis.ANSWER_CACHE = new Map();
       const cached = qKey ? globalThis.ANSWER_CACHE.get(qKey) : null;
       if (cached && (Date.now() - cached.t) < 600000) {
@@ -201,12 +206,17 @@ export default {
         return new Response(JSON.stringify({ text: cached.a }), { headers: { ...cors, 'Content-Type': 'application/json' } });
       }
 
+      // النص الأمامي + ملخّص الأقدم (إن وُجد) = سياق كامل بلا استدعاء نموذج إضافي.
+      const systemText = digest
+        ? SYSTEM + '\n\n## معلومات الزائر السابقة من هذه المحادثة (موثوقة، اعتمد عليها مباشرة عند السؤال عنها ولا تقل إنك لا تملكها)\n' + digest
+        : SYSTEM;
+
       let text = '', partial = '', usedModel = '', cut = 0, lastErr = '', usage = null;
       for (const m of MODELS) {
         const isOss = /gpt-oss/i.test(m);
         const body = {
           model: m,
-          messages: [{ role: 'system', content: SYSTEM }, ...messages],
+          messages: [{ role: 'system', content: systemText }, ...messages],
           temperature: 0.3,
           max_tokens: isOss ? 700 : 1500
         };
@@ -238,7 +248,56 @@ export default {
           ? 'المساعد مشغول الآن بسبب كثرة الأسئلة — انتظر قليلاً ثم أعد السؤال، أو راسلني مباشرة على واتساب: ' + WA_LINK
           : (partial || FALLBACK);
       }
-      if (text && text !== FALLBACK && qKey) {
+
+      // ===== حجز استشارة داخل المحادثة =====
+      // إن أنتج النموذج قالب [[حجز]]{...}[[/حجز]] مع اكتمال الحقول:
+      // يُرسل الطلب إلى تبويب «استشارات» في نفس الـ Sheet مع إيميل فوري للنذير،
+      // ويُستبدل رؤية المستخدم برسالة تأكيد ثابتة. القالب المكتمل لا يظهر للمستخدم.
+      let booked = false;
+      const bk = text.match(/\[\[\s*حجز\s*\]\]([\s\S]*?)\[\[\s*\/\s*حجز\s*\]\]/);
+      if (bk) {
+        text = text.replace(bk[0], '').replace(/```[\s\S]*?```/g, '').trim();
+        let f = null;
+        try {
+          const j = JSON.parse(bk[1].trim().replace(/^```(?:json)?/, '').replace(/```$/, '').trim());
+          if (j && String(j['الاسم'] || '').trim() && String(j['التواصل'] || '').trim() && String(j['المشكلة'] || '').trim()) {
+            f = {
+              name: String(j['الاسم']).trim().slice(0, 80),
+              contact: String(j['التواصل']).trim().slice(0, 120),
+              problem: String(j['المشكلة']).trim().slice(0, 1000)
+            };
+          }
+        } catch (e) {}
+        if (f) {
+          const isMail = /@/.test(f.contact);
+          const ctl = new AbortController();
+          const timer = setTimeout(function () { ctl.abort(); }, 8000);
+          try {
+            const br = await fetch(SHEET_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams({
+                form: 'booking', page: page,
+                name: f.name, phone: isMail ? '' : f.contact, email: isMail ? f.contact : '',
+                work: 'حجز عبر المساعد الذكي', problem: f.problem, size: ''
+              }),
+              signal: ctl.signal
+            });
+            const bj = await br.json();
+            booked = !!(bj && bj.ok);
+            console.log(JSON.stringify({ booking: booked, tab: bj && bj.tab, row: bj && bj.row, err: bj && bj.error }));
+          } catch (e) {
+            console.log(JSON.stringify({ booking: false, err: String(e).slice(0, 120) }));
+          } finally {
+            clearTimeout(timer);
+          }
+          text = booked
+            ? 'تم استلام طلبك بنجاح، وسيتواصل معك النذير لتحديد موعد الاستشارة المجانية.\n\nإن لم يصلك اتصال خلال يومين راسله مباشرة على واتساب: ' + WA_LINK
+            : 'حصل خلل تقني ولم يصل طلبك — أعد المحاولة بعد قليل، أو راسل النذير مباشرة على واتساب: ' + WA_LINK;
+        }
+      }
+
+      if (text && text !== FALLBACK && !booked && qKey) {
         globalThis.ANSWER_CACHE.set(qKey, { a: text, t: Date.now() });
         if (globalThis.ANSWER_CACHE.size > 60) {
           globalThis.ANSWER_CACHE.delete(globalThis.ANSWER_CACHE.keys().next().value);

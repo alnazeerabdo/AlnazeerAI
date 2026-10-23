@@ -368,12 +368,41 @@
      var AI_WORKER_URL = 'https://alnathir-ai.username.workers.dev';
      اتركه فارغاً وستظهر رسالة توجيه للواتساب والحجز. */
   var AI_WORKER_URL = 'https://alnazeerai.alnzyrbdalmnm90.workers.dev/';
+  /* كابتشا خفي (Cloudflare Turnstile) — يمنع الأتمتة من استعمال المساعد.
+     إن حذفت هذا المتغيّر يبقى المساعد يعمل عادي (الخادم يتجاوز التحقق). */
+  var TURNSTILE_SITEKEY = '0x4AAAAAAFiAHVOaFA8sbZ2n';
   (function () {
     var log = document.getElementById('aiLog');
     if (!log) return;
     var form = document.getElementById('aiForm'), inp = document.getElementById('aiText');
     var chips = document.getElementById('aiChips');
-    var hist = [], busy = false, lastSend = 0;
+    /* ---- ذاكرة المحادثة (تبقى عبر الصفحات لأن الموقع صفحات متعددة) ----
+       نحتفظ بآخر MAX_HIST رسالة في sessionStorage، ونرسل SEND_WINDOW نصاً كاملاً،
+       وما قبلها ملخّصاً مضغوطاً (digest) حتى يظل المساعد يتذكر محادثته بلا توكنات زائدة. */
+    var MAX_HIST = 40, SEND_WINDOW = 16, DIGEST_CAP = 1200;
+    var K_HIST = 'alnazeer_chat_hist', K_TR = 'alnazeer_chat_view';
+    function store(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    function read(k) { try { var v = JSON.parse(sessionStorage.getItem(k) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+    function loadHist() {
+      return read(K_HIST).filter(function (m) {
+        return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string';
+      }).slice(-MAX_HIST);
+    }
+    function saveHist() { store(K_HIST, hist.slice(-MAX_HIST)); }
+    function pushView(c, t) {
+      var tr = read(K_TR); tr.push({ c: c, t: String(t).slice(0, 2000) });
+      store(K_TR, tr.slice(-MAX_HIST));
+    }
+    function buildDigest(h) {
+      if (h.length <= SEND_WINDOW) return '';
+      var old = h.slice(0, h.length - SEND_WINDOW), s = '';
+      for (var i = 0; i < old.length; i++) {
+        s += (old[i].role === 'user' ? 'س: ' : 'ن: ') + String(old[i].content).replace(/\s+/g, ' ').slice(0, 140) + '\n';
+      }
+      s = s.trim();
+      return s.length > DIGEST_CAP ? s.slice(-DIGEST_CAP) : s;
+    }
+    var hist = loadHist(), busy = false, lastSend = 0;
     /* معرّف المحادثة: ثابت لكل جلسة/تبويب، يُرسل مع كل رسالة ليُفرَّق بين المحادثات في السجل. */
     function sessionId() {
       var k = 'alnazeer_chat_session';
@@ -518,11 +547,69 @@
     }
     function greet() {
       if (log.children.length) return;
+      /* إن كانت هناك محادثة سابقة (نفس التبويب عبر الصفحات) نعرضها بدل الترحيب. */
+      var tr = read(K_TR).filter(function (it) { return it && typeof it.t === 'string'; });
+      if (tr.length) {
+        for (var i = 0; i < tr.length; i++) {
+          var u = tr[i].c === 'u';
+          add(u ? 'user' : 'bot', u ? esc(tr[i].t) : linkify(tr[i].t));
+        }
+        log.scrollTop = log.scrollHeight;
+        return;
+      }
       add('bot', 'أهلاً بك، أنا مساعد الذكاء الاصطناعي الخاص بالنذير، يمكنني مساعدتك في كل ما تحتاج معرفته عن الخدمات والأسعار وحجز المواعيد مع النذير.');
     }
     function offline() {
       add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="free-session.html">حجز استشارتك المجانية</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
     }
+    /* ---- Cloudflare Turnstile (كابتشا خفي) ----
+       يتحصّل رمز صالح قبل كل إرسال. إن حُذف TURNSTILE_SITEKEY أو تعذّر التحميل
+       يمرّ الرمز null، والخادم يرفض (يلزم أرخص التأكد أنك إنسان).
+       أي مشكلة تحميل = رسالة واضحة بدل «حاول مجدداً» لخداع المتصل. */
+    var tsWidget = null, tsToken = null, tsReady = false, tsLoaded = false, tsPrimed = false;
+    function ensureTurnstile() {
+      if (!TURNSTILE_SITEKEY || tsLoaded) return;
+      tsLoaded = true;
+      var s = document.createElement('script');
+      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      s.async = true;
+      s.onload = function () {
+        try {
+          var host = document.createElement('div');
+          host.id = 'aiTsMount';
+          host.setAttribute('aria-hidden', 'true');
+          host.style.cssText = 'width:300px;max-width:100%;overflow:hidden;margin:4px auto;';
+          if (form && form.parentNode) form.parentNode.insertBefore(host, form);
+          else document.body.appendChild(host);
+          tsWidget = window.turnstile.render(host, {
+            sitekey: TURNSTILE_SITEKEY,
+            size: 'invisible',
+            callback: function (t) { tsToken = t; }
+          });
+          tsReady = !!tsWidget;
+        } catch (e) { tsReady = false; }
+      };
+      s.onerror = function () { tsReady = false; };
+      document.head.appendChild(s);
+    }
+    function withToken(cb) {
+      if (!TURNSTILE_SITEKEY) return cb(null);
+      if (!tsReady || !window.turnstile || !tsWidget) { cb(null); return; }
+      var finished = false;
+      var iv = null;
+      var tm = setTimeout(function () { done(null); }, 12000);
+      function done(tok) {
+        if (finished) return;
+        finished = true; clearTimeout(tm); if (iv) clearInterval(iv);
+        if (tok) tsPrimed = true;
+        cb(tok || null);
+      }
+      if (tsPrimed) { try { window.turnstile.reset(tsWidget); } catch (e) {} tsToken = null; }
+      try { window.turnstile.execute(tsWidget); } catch (e) { done(null); return; }
+      iv = setInterval(function () { if (tsToken) done(tsToken); }, 150);
+    }
+    ensureTurnstile();
+
     function send(q) {
       add('user', esc(q));
       if (!AI_WORKER_URL) { offline(); return; }
@@ -531,18 +618,31 @@
       busy = true; lastSend = now;
       var tp = add('bot ai-typing', '…');
       hist.push({ role: 'user', content: q });
-      hist = hist.slice(-6);
-      fetch(AI_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: hist, session: sessionId(), page: location.pathname }) })
-        .then(function (r) { return r.json(); })
-        .then(function (j) {
-          var t = (j && j.text) || 'عذراً، حاول مجدداً.';
-          hist.push({ role: 'assistant', content: t });
-          hist = hist.slice(-6);
-          typeMessage(tp, t, function () { busy = false; });
-        })
-        .catch(function () {
-          typeMessage(tp, 'تعذر الاتصال. يمكنك الحجز من free-session.html أو مراسلتي واتساب.', function () { busy = false; });
-        });
+      hist = hist.slice(-MAX_HIST);
+      pushView('u', q); saveHist();
+      var recent = hist.slice(-SEND_WINDOW);
+      var digest = buildDigest(hist);
+      withToken(function (token) {
+        if (TURNSTILE_SITEKEY && !token) {
+          typeMessage(tp, 'تعذّر التأكد من أنك إنسان (تعذّر تحميل فحص الحماية). أعد فتح الصفحة، أو تواصل عبر https://wa.me/249117148664', function () { busy = false; });
+          return;
+        }
+        var payload = { messages: recent, session: sessionId(), page: location.pathname };
+        if (digest) payload.digest = digest;
+        if (token) payload.turnstile = token;
+        fetch(AI_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            var t = (j && j.text) || 'عذراً، حاول مجدداً.';
+            hist.push({ role: 'assistant', content: t });
+            hist = hist.slice(-MAX_HIST);
+            pushView('a', t); saveHist();
+            typeMessage(tp, t, function () { busy = false; });
+          })
+          .catch(function () {
+            typeMessage(tp, 'تعذر الاتصال. يمكنك الحجز من free-session.html أو مراسلتي واتساب.', function () { busy = false; });
+          });
+      });
     }
     if (form) form.addEventListener('submit', function (e) {
       e.preventDefault();
