@@ -474,7 +474,8 @@
        يتحصّل رمز صالح قبل كل إرسال. إن حُذف TURNSTILE_SITEKEY أو تعذّر التحميل
        يمرّ الرمز null، والخادم يرفض (يلزم أرخص التأكد أنك إنسان).
        أي مشكلة تحميل = رسالة واضحة بدل «حاول مجدداً» لخداع المتصل. */
-    var tsWidget = null, tsToken = null, tsReady = false, tsLoaded = false, tsPrimed = false;
+    var tsWidget = null, tsToken = null, tsLoaded = false;
+    function tsLog() { try { console.warn.apply(console, ['[chat]'].concat([].slice.call(arguments))); } catch (e) {} }
     function ensureTurnstile() {
       if (!TURNSTILE_SITEKEY || tsLoaded) return;
       tsLoaded = true;
@@ -485,36 +486,59 @@
         try {
           var host = document.createElement('div');
           host.id = 'aiTsMount';
-          host.setAttribute('aria-hidden', 'true');
           host.style.cssText = 'width:300px;max-width:100%;overflow:hidden;margin:4px auto;';
           if (form && form.parentNode) form.parentNode.insertBefore(host, form);
           else document.body.appendChild(host);
           tsWidget = window.turnstile.render(host, {
             sitekey: TURNSTILE_SITEKEY,
             size: 'invisible',
-            callback: function (t) { tsToken = t; }
+            callback: function (t) { tsToken = t; },
+            'error-callback': function () { tsLog('widget error-callback'); }
           });
-          tsReady = !!tsWidget;
-        } catch (e) { tsReady = false; }
+          if (!tsWidget) tsLog('render returned nothing');
+        } catch (e) { tsLog('render threw', e && e.message); }
       };
-      s.onerror = function () { tsReady = false; };
+      s.onerror = function () { tsLog('api.js blocked or failed to load'); };
       document.head.appendChild(s);
     }
+    /* يتحصّل رمز Turnstile مع انتظار التحميل + محاولة ثانية عند التعليق.
+       يعيد null إذا تعذّر — والإرسال يبقى جارياً والخادم هو من يحسم. */
     function withToken(cb) {
       if (!TURNSTILE_SITEKEY) return cb(null);
-      if (!tsReady || !window.turnstile || !tsWidget) { cb(null); return; }
-      var finished = false;
-      var iv = null;
-      var tm = setTimeout(function () { done(null); }, 12000);
-      function done(tok) {
-        if (finished) return;
-        finished = true; clearTimeout(tm); if (iv) clearInterval(iv);
-        if (tok) tsPrimed = true;
-        cb(tok || null);
+      var tries = 0;
+      function attempt() {
+        tries++;
+        if (!window.turnstile || !tsWidget) {
+          if (tries < 8) return setTimeout(attempt, 700);   // انتظر تحميل المكتبة/الودجت
+          tsLog('unavailable after', tries, 'tries');
+          return cb(null);
+        }
+        var settled = false, iv = null;
+        tsToken = null;
+        try { window.turnstile.execute(tsWidget); }
+        catch (e) {
+          tsLog('execute threw', e && e.message);
+          if (tries < 2) return setTimeout(attempt, 500);
+          return cb(null);
+        }
+        var tm = setTimeout(function () {
+          if (settled) return;
+          settled = true; clearInterval(iv);
+          if (tries < 2) {                       // محاولة ثانية بعد reset
+            try { window.turnstile.reset(tsWidget); } catch (e) {}
+            return setTimeout(attempt, 400);
+          }
+          tsLog('timeout after', tries, 'tries');
+          cb(null);
+        }, 9000);
+        iv = setInterval(function () {
+          if (tsToken && !settled) {
+            settled = true; clearTimeout(tm); clearInterval(iv);
+            cb(tsToken);
+          }
+        }, 120);
       }
-      if (tsPrimed) { try { window.turnstile.reset(tsWidget); } catch (e) {} tsToken = null; }
-      try { window.turnstile.execute(tsWidget); } catch (e) { done(null); return; }
-      iv = setInterval(function () { if (tsToken) done(tsToken); }, 150);
+      attempt();
     }
     ensureTurnstile();
 
@@ -531,10 +555,6 @@
       var recent = hist.slice(-SEND_WINDOW);
       var digest = buildDigest(hist);
       withToken(function (token) {
-        if (TURNSTILE_SITEKEY && !token) {
-          typeMessage(tp, 'تعذّر التأكد من أنك إنسان (تعذّر تحميل فحص الحماية). أعد فتح الصفحة، أو تواصل عبر https://wa.me/249117148664', function () { busy = false; });
-          return;
-        }
         var payload = { messages: recent, session: sessionId(), page: location.pathname };
         if (digest) payload.digest = digest;
         if (token) payload.turnstile = token;
