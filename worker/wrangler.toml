@@ -33,10 +33,13 @@ rules = [
 [vars]
 ALLOWED_ORIGINS = "https://alnazeerabdo.github.io"
 
-# --- Cloudflare Turnstile (كابتشا خفي) ---
-# الودجت: "alnazeerai-chat-v2" — نطاقات مسموح بها: github.io + workers.dev
-# المفتاح السري مضبوط كـ secret: npx wrangler secret put TURNSTILE_SECRET (تم)
-TURNSTILE_SITEKEY = "0x4AAAAAAFiAHVOaFA8sbZ2n"
+# --- الحماية ---
+# 1) حدود KV: 30 طلب/دقيقة/IP + 150 طلب/يوم/IP + 50 رسالة/يوم/جلسة
+# 2) فلتر حقن التعليمات + سقف حجم الطلب
+# 3) قفل النطاق (ALLOWED_ORIGINS أعلاه)
+# الكابتشا (Turnstile) مُعطّلة: حُذف TURNSTILE_SECRET ولم يعد العميل يرسل رمزاً.
+# لإعادة التفعيل لاحقاً: npx wrangler secret put TURNSTILE_SECRET
+# + أعد إضافة TURNSTILE_SITEKEY هنا وكود المصادقة في العميل.
 
 # --- Rate limiting عبر KV (فعّال منذ إنشاء الـ namespace) ---
 # يقيّد: 30 طلب/دقيقة/IP + 150 طلب/يوم/IP + 50 رسالة/يوم/جلسة

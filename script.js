@@ -297,9 +297,8 @@
      var AI_WORKER_URL = 'https://alnathir-ai.username.workers.dev';
      اتركه فارغاً وستظهر رسالة توجيه للواتساب والحجز. */
   var AI_WORKER_URL = 'https://alnazeerai.alnzyrbdalmnm90.workers.dev/';
-  /* كابتشا خفي (Cloudflare Turnstile) — يمنع الأتمتة من استعمال المساعد.
-     إن حذفت هذا المتغيّر يبقى المساعد يعمل عادي (الخادم يتجاوز التحقق). */
-  var TURNSTILE_SITEKEY = '0x4AAAAAAFiAHVOaFA8sbZ2n';
+  /* نقاط انتظار متحرّكة تُعرض أثناء انتظار ردّ المساعد. */
+  var DOTS_HTML = '<span class="ai-dots" aria-label="يكتب…"><i></i><i></i><i></i></span>';
   (function () {
     var log = document.getElementById('aiLog');
     if (!log) return;
@@ -492,102 +491,33 @@
     function offline() {
       add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="free-session.html">حجز استشارتك المجانية</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
     }
-    /* ---- Cloudflare Turnstile (كابتشا خفي) ----
-       يتحصّل رمز صالح قبل كل إرسال. إن حُذف TURNSTILE_SITEKEY أو تعذّر التحميل
-       يمرّ الرمز null، والخادم يرفض (يلزم أرخص التأكد أنك إنسان).
-       أي مشكلة تحميل = رسالة واضحة بدل «حاول مجدداً» لخداع المتصل. */
-    var tsWidget = null, tsToken = null, tsReady = false, tsLoaded = false, tsBusy = false;
-    function tsLog() { try { console.warn.apply(console, ['[chat]'].concat([].slice.call(arguments))); } catch (e) {} }
-    function ensureTurnstile() {
-      if (!TURNSTILE_SITEKEY || tsLoaded) return;
-      tsLoaded = true;
-      var s = document.createElement('script');
-      s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-      s.async = true;
-      s.onload = function () {
-        try {
-          var host = document.createElement('div');
-          host.id = 'aiTsMount';
-          host.style.cssText = 'width:300px;max-width:100%;overflow:hidden;margin:4px auto;';
-          if (form && form.parentNode) form.parentNode.insertBefore(host, form);
-          else document.body.appendChild(host);
-          tsWidget = window.turnstile.render(host, {
-            sitekey: TURNSTILE_SITEKEY,
-            size: 'invisible',
-            callback: function (t) { tsToken = t; tsBusy = false; },
-            ready: function () { tsReady = true; },
-            'error-callback': function () { tsLog('widget error-callback'); tsBusy = false; }
-          });
-          if (!tsWidget) tsLog('render returned nothing');
-        } catch (e) { tsLog('render threw', e && e.message); }
-      };
-      s.onerror = function () { tsLog('api.js blocked or failed to load'); };
-      document.head.appendChild(s);
-    }
-    /* يحضّر رمزاً في الخلفية حتى يكون الإرسال فورياً (بدل انتظار الفحص مع كل رسالة). */
-    function primeToken() {
-      if (!TURNSTILE_SITEKEY || !window.turnstile || !tsWidget || !tsReady || tsBusy || tsToken) return;
-      tsBusy = true;
-      try { window.turnstile.execute(tsWidget); }
-      catch (e) { tsBusy = false; tsLog('prime execute threw', e && e.message); return; }
-      setTimeout(function () { if (tsBusy && !tsToken) tsBusy = false; }, 8000); // مهلة أمان
-    }
-    /* يستهلك الرمز المخزّن فوراً ويحضّر التالي. إن لم يتوفر خلال 1.5 ثانية
-       يُرسَل الطلب بدونه — الخادم هو من يحسم، ولا نحجب الزائر. */
-    function withToken(cb) {
-      if (!TURNSTILE_SITEKEY) return cb(null);
-      if (tsToken) {
-        var have = tsToken; tsToken = null; primeToken();
-        return cb(have);
-      }
-      var waited = 0;
-      var iv = setInterval(function () {
-        waited += 100;
-        if (tsToken) {
-          clearInterval(iv);
-          var t = tsToken; tsToken = null; primeToken();
-          cb(t);
-          return;
-        }
-        if (waited >= 1500) { clearInterval(iv); primeToken(); cb(null); }
-      }, 100);
-    }
-    ensureTurnstile();
-
+    /* لا كابتشا: الحماية عبر حدود KV + فلتر حقن + قفل النطاق في الخادم. */
     function send(q) {
       add('user', esc(q));
       if (!AI_WORKER_URL) { offline(); return; }
       var now = Date.now();
       if (busy || now - lastSend < 5000) { add('bot', 'مهلاً قليلاً…'); return; }
       busy = true; lastSend = now;
-      var tp = add('bot ai-typing', '…');
+      var tp = add('bot ai-typing', DOTS_HTML);
       hist.push({ role: 'user', content: q });
       hist = hist.slice(-MAX_HIST);
       pushView('u', q); saveHist();
       var recent = hist.slice(-SEND_WINDOW);
       var digest = buildDigest(hist);
-      withToken(function (token) {
-        var payload = { messages: recent, session: sessionId(), page: location.pathname };
-        if (digest) payload.digest = digest;
-        if (token) payload.turnstile = token;
-        fetch(AI_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-          .then(function (r) { return r.json(); })
-          .then(function (j) {
-            var t = (j && j.text) || 'عذراً، حاول مجدداً.';
-            hist.push({ role: 'assistant', content: t });
-            hist = hist.slice(-MAX_HIST);
-            pushView('a', t); saveHist();
-            typeMessage(tp, t, function () { busy = false; });
-          })
-          .catch(function () {
-            typeMessage(tp, 'تعذر الاتصال. يمكنك الحجز من free-session.html أو مراسلتي واتساب.', function () { busy = false; });
-          });
-      });
-    }
-    /* تحضير رمز الحماية مبكراً (عند فتح المحادثة/الكتابة) حتى لا ينتظر الزائر. */
-    if (inp) {
-      inp.addEventListener('focus', primeToken, { once: true });
-      inp.addEventListener('keydown', primeToken, { once: true });
+      var payload = { messages: recent, session: sessionId(), page: location.pathname };
+      if (digest) payload.digest = digest;
+      fetch(AI_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          var t = (j && j.text) || 'عذراً، حاول مجدداً.';
+          hist.push({ role: 'assistant', content: t });
+          hist = hist.slice(-MAX_HIST);
+          pushView('a', t); saveHist();
+          typeMessage(tp, t, function () { busy = false; });
+        })
+        .catch(function () {
+          typeMessage(tp, 'تعذر الاتصال. يمكنك الحجز من free-session.html أو مراسلتي واتساب.', function () { busy = false; });
+        });
     }
     if (form) form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -628,7 +558,7 @@
         add('bot', 'تم مسح المحادثة — ابدأ من جديد، كيف يمكنني مساعدتك؟');
       });
     }
-    if (chatFab) chatFab.addEventListener('click', function () { primeToken(); setTimeout(greet, 350); });
+    if (chatFab) chatFab.addEventListener('click', function () { setTimeout(greet, 350); });
     greet();
   })();
 
