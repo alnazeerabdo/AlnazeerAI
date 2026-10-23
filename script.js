@@ -474,7 +474,7 @@
        يتحصّل رمز صالح قبل كل إرسال. إن حُذف TURNSTILE_SITEKEY أو تعذّر التحميل
        يمرّ الرمز null، والخادم يرفض (يلزم أرخص التأكد أنك إنسان).
        أي مشكلة تحميل = رسالة واضحة بدل «حاول مجدداً» لخداع المتصل. */
-    var tsWidget = null, tsToken = null, tsLoaded = false;
+    var tsWidget = null, tsToken = null, tsReady = false, tsLoaded = false;
     function tsLog() { try { console.warn.apply(console, ['[chat]'].concat([].slice.call(arguments))); } catch (e) {} }
     function ensureTurnstile() {
       if (!TURNSTILE_SITEKEY || tsLoaded) return;
@@ -493,6 +493,7 @@
             sitekey: TURNSTILE_SITEKEY,
             size: 'invisible',
             callback: function (t) { tsToken = t; },
+            ready: function () { tsReady = true; },
             'error-callback': function () { tsLog('widget error-callback'); }
           });
           if (!tsWidget) tsLog('render returned nothing');
@@ -501,7 +502,7 @@
       s.onerror = function () { tsLog('api.js blocked or failed to load'); };
       document.head.appendChild(s);
     }
-    /* يتحصّل رمز Turnstile مع انتظار التحميل + محاولة ثانية عند التعليق.
+    /* يتحصّل رمز Turnstile مع انتظار جاهزية الودجت + محاولة ثانية عند التعليق.
        يعيد null إذا تعذّر — والإرسال يبقى جارياً والخادم هو من يحسم. */
     function withToken(cb) {
       if (!TURNSTILE_SITEKEY) return cb(null);
@@ -509,10 +510,11 @@
       function attempt() {
         tries++;
         if (!window.turnstile || !tsWidget) {
-          if (tries < 8) return setTimeout(attempt, 700);   // انتظر تحميل المكتبة/الودجت
-          tsLog('unavailable after', tries, 'tries');
+          if (tries < 10) return setTimeout(attempt, 600);   // انتظر تحميل المكتبة
+          tsLog('library/widget missing after', tries, 'tries');
           return cb(null);
         }
+        if (!tsReady && tries < 8) return setTimeout(attempt, 500); // انتظر إشارة ready
         var settled = false, iv = null;
         tsToken = null;
         try { window.turnstile.execute(tsWidget); }
