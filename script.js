@@ -20,7 +20,6 @@
       size: 'size'
     }
   };
-  window.GOOGLE_FORM_CONFIG = GOOGLE_FORM_CONFIG;
 
   // Mobile menu
   var menuBtn = document.getElementById('menuBtn');
@@ -127,16 +126,6 @@
     });
   });
 
-  // Prefill service from ?service= or ?topic=
-  try {
-    var params = new URLSearchParams(location.search);
-    var svc = params.get('service') || params.get('topic');
-    if (svc) {
-      var serviceField = document.getElementById('serviceInterest');
-      if (serviceField) serviceField.value = svc;
-    }
-  } catch (e) {}
-
   // Booking form -> Google Form (or fallback)
   var booking = document.getElementById('bookingForm');
   if (booking) {
@@ -219,88 +208,6 @@
           });
       } else {
         showSuccess();
-      }
-    });
-  }
-
-  // Contact receiver: same Apps Script web app, routed to the "تواصل" tab
-  var CONTACT_FORM_CONFIG = {
-    enabled: true,
-    actionUrl: 'https://script.google.com/macros/s/AKfycbxR1B9QCCZF-9gN-_uexloBwxDDKl8qf9CzVYaN9K0NQZstVnLnwPR6ANpYCseyTgp1/exec',
-    fields: { name: 'name', phone: 'phone', email: 'email', message: 'message' }
-  };
-  window.CONTACT_FORM_CONFIG = CONTACT_FORM_CONFIG;
-
-  // Contact form (contact.html) -> Apps Script
-  var cform = document.getElementById('contactForm');
-  if (cform && !booking) {
-    cform.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var n = document.getElementById('name');
-      var ph = document.getElementById('cphone');
-      var em = document.getElementById('email');
-      var ms = document.getElementById('msg');
-      var note = document.getElementById('formNote');
-      var csuccess = document.getElementById('contactSuccess');
-      if (!n || !ph || !em || !ms) return;
-      var nv = n.value.trim(), pv = ph.value.trim(), ev = em.value.trim(), mv = ms.value.trim();
-      var cbtn = cform.querySelector('button[type="submit"]');
-      var cbtnHtml = cbtn ? cbtn.innerHTML : '';
-      function setCLoading(on) {
-        if (!cbtn) return;
-        if (on) {
-          cbtn.disabled = true;
-          cbtn.classList.add('loading');
-          cbtn.innerHTML = 'جارٍ الإرسال<span class="dots" aria-hidden="true"><span>.</span><span>.</span><span>.</span></span>';
-        } else {
-          cbtn.disabled = false;
-          cbtn.classList.remove('loading');
-          cbtn.innerHTML = cbtnHtml;
-        }
-      }
-      function showCSuccess() {
-        setCLoading(false);
-        var nm = document.getElementById('contactName');
-        if (nm) nm.textContent = nv;
-        cform.style.display = 'none';
-        if (csuccess) {
-          csuccess.hidden = false;
-          if (csuccess.scrollIntoView) csuccess.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
-        }
-        cform.reset();
-      }
-      var cagain = document.getElementById('contactAgain');
-      if (cagain && !cagain.dataset.bound) {
-        cagain.dataset.bound = '1';
-        cagain.addEventListener('click', function () {
-          if (csuccess) csuccess.hidden = true;
-          cform.style.display = '';
-          if (note) note.textContent = '';
-        });
-      }
-      if (!nv || !pv || !ev || !mv) {
-        note.style.color = '#FFB4B4';
-        note.textContent = 'يرجى تعبئة جميع الحقول المطلوبة.';
-        return;
-      }
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ev)) {
-        note.style.color = '#FFB4B4';
-        note.textContent = 'يرجى إدخال بريد إلكتروني صحيح.';
-        return;
-      }
-      setCLoading(true);
-      if (CONTACT_FORM_CONFIG.enabled && CONTACT_FORM_CONFIG.actionUrl) {
-        var cfd = new FormData();
-        cfd.append('form', 'contact');
-        cfd.append(CONTACT_FORM_CONFIG.fields.name, nv);
-        cfd.append(CONTACT_FORM_CONFIG.fields.phone, pv);
-        cfd.append(CONTACT_FORM_CONFIG.fields.email, ev);
-        cfd.append(CONTACT_FORM_CONFIG.fields.message, mv);
-        fetch(CONTACT_FORM_CONFIG.actionUrl, { method: 'POST', mode: 'no-cors', body: cfd })
-          .then(function () { showCSuccess(); })
-          .catch(function () { showCSuccess(); });
-      } else {
-        showCSuccess();
       }
     });
   }
@@ -554,6 +461,7 @@
           var u = tr[i].c === 'u';
           add(u ? 'user' : 'bot', u ? esc(tr[i].t) : linkify(tr[i].t));
         }
+        if (chips) chips.hidden = true;
         log.scrollTop = log.scrollHeight;
         return;
       }
@@ -653,30 +561,80 @@
     });
     if (chips) chips.addEventListener('click', function (e) {
       var b = e.target.closest('.chip');
-      if (b) send(b.textContent);
+      if (!b) return;
+      chips.hidden = true;
+      send(b.textContent);
     });
+    /* ---- أزرار رأس المحادثة: مسح المحادثة + إغلاق النافذة ---- */
+    var aiHead = chatPop ? chatPop.querySelector('.ai-head') : null;
+    if (aiHead) {
+      var clearBtn = document.createElement('button');
+      clearBtn.className = 'ai-clear';
+      clearBtn.type = 'button';
+      clearBtn.textContent = 'مسح المحادثة';
+      aiHead.appendChild(clearBtn);
+      var popX = document.createElement('button');
+      popX.className = 'ai-pop-x';
+      popX.type = 'button';
+      popX.setAttribute('aria-label', 'إغلاق المحادثة');
+      popX.textContent = '×';
+      aiHead.appendChild(popX);
+      popX.addEventListener('click', function () {
+        chatPop.classList.remove('open');
+        if (chatFab) { chatFab.classList.remove('open'); chatFab.setAttribute('aria-expanded', 'false'); }
+      });
+      clearBtn.addEventListener('click', function () {
+        hist = [];
+        try { sessionStorage.removeItem(K_HIST); sessionStorage.removeItem(K_TR); } catch (e) {}
+        if (log) log.innerHTML = '';
+        if (chips) chips.hidden = false;
+        add('bot', 'تم مسح المحادثة — ابدأ من جديد، كيف يمكنني مساعدتك؟');
+      });
+    }
     if (chatFab) chatFab.addEventListener('click', function () { setTimeout(greet, 350); });
     greet();
   })();
 
   /* ===== AI assistant nudge =====
-     بعد بقاء الزائر على الموقع فترة، نعرض تلميحاً صغيراً يشرح فائدة المساعد الذكي */
+     بعد 10 ثوانٍ من دخول الزائر نعرض تلميحاً صغيراً عن المساعد الذكي.
+     إغلاقه (بالزر أو بالضغط في أي مكان) يُسجَّل في localStorage، ولا يعود
+     لدقيقتين حتى لو حدّث الزائر الصفحة. */
   (function () {
     if (!chatFab) return;
+    var K_TIP = 'alnazeer_ai_tip_closed';
+    var TIP_SHOW_AFTER = 10000, TIP_LINGER = 12000, TIP_RESHOW_AFTER = 120000;
     var tip = document.createElement('div');
     tip.className = 'ai-tip';
     tip.setAttribute('role', 'status');
-    tip.textContent = 'تحتاج مساعدة؟ المساعد الذكي يرد عليك فوراً';
+    var tipText = document.createElement('span');
+    tipText.className = 'ai-tip-text';
+    tipText.textContent = 'تحتاج مساعدة؟ المساعد الذكي يرد عليك فوراً';
+    var tipX = document.createElement('button');
+    tipX.className = 'ai-tip-x';
+    tipX.type = 'button';
+    tipX.setAttribute('aria-label', 'إغلاق التنبيه');
+    tipX.textContent = '×';
+    tip.appendChild(tipText);
+    tip.appendChild(tipX);
     document.body.appendChild(tip);
-    var shown = false;
-    function hideTip() { tip.classList.remove('show'); }
+    var lingerTimer = null;
+    function lastClosedAt() { try { return +localStorage.getItem(K_TIP) || 0; } catch (e) { return 0; } }
+    function suppressed() { return Date.now() - lastClosedAt() < TIP_RESHOW_AFTER; }
+    function hideTip() {
+      tip.classList.remove('show');
+      if (lingerTimer) { clearTimeout(lingerTimer); lingerTimer = null; }
+      try { localStorage.setItem(K_TIP, String(Date.now())); } catch (e) {}
+    }
+    tipX.addEventListener('click', function (e) { e.stopPropagation(); hideTip(); });
     chatFab.addEventListener('click', hideTip);
+    document.addEventListener('click', function (e) {
+      if (tip.classList.contains('show') && !tip.contains(e.target)) hideTip();
+    });
     setTimeout(function () {
       if (chatPop && chatPop.classList.contains('open')) return;
-      if (shown) return;
-      shown = true;
+      if (suppressed()) return;
       tip.classList.add('show');
-      setTimeout(hideTip, 9000);
-    }, 12000);
+      lingerTimer = setTimeout(hideTip, TIP_LINGER);
+    }, TIP_SHOW_AFTER);
   })();
 })();
