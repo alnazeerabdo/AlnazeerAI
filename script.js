@@ -270,6 +270,28 @@
     });
   }
 
+  /* ===== Visual viewport fit (mobile keyboard) =====
+     على الجوال/اللوح يصغر مساحة العرض عند فتح لوحة المفاتيح، فتُضبط
+     ارتفاع النافذة وموقعها على المساحة المرئية الحقيقية حتى يبقى حقل
+     الكتابة ظاهراً فوق لوحة المفاتيح دائماً. */
+  if (chatPop && window.visualViewport) {
+    var vv = window.visualViewport;
+    var fitChatVv = function () {
+      if (!chatPop.classList.contains('open')) {
+        chatPop.style.removeProperty('--vvp-top');
+        chatPop.style.removeProperty('--vvp-h');
+        return;
+      }
+      chatPop.style.setProperty('--vvp-top', vv.offsetTop + 'px');
+      chatPop.style.setProperty('--vvp-h', vv.height + 'px');
+    };
+    vv.addEventListener('resize', fitChatVv);
+    vv.addEventListener('scroll', fitChatVv);
+    if ('MutationObserver' in window) {
+      new MutationObserver(fitChatVv).observe(chatPop, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
+
   /* ===== AI chat (Groq via Cloudflare Worker) =====
      بعد نشر الـ Worker الصق رابطه هنا، مثال:
      var AI_WORKER_URL = 'https://alnathir-ai.username.workers.dev';

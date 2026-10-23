@@ -459,3 +459,22 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
   .nav-links > a{font-size:15px;padding:11px 12px}
   .drawer-cta .btn{font-size:13px}
 }
+/* Mobile/tablet: chat popup becomes a full sheet that tracks the visual
+   viewport (set from JS) so the input stays visible above the on-screen keyboard */
+@media(max-width:960px){
+  .chat-pop.ai-chat{
+    top:var(--vvp-top,0px);
+    bottom:auto;
+    height:var(--vvp-h,100vh);
+    width:100%;
+    max-width:none;
+    inset-inline:0;
+    border-radius:0;
+    border:none;
+    box-shadow:none;
+    transform:none;
+  }
+  .chat-pop.ai-chat.open{transform:none}
+  .chat-pop.ai-chat .ai-log{padding-bottom:18px}
+  .chat-pop.ai-chat .ai-input{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+}
