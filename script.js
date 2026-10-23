@@ -474,7 +474,7 @@
        يتحصّل رمز صالح قبل كل إرسال. إن حُذف TURNSTILE_SITEKEY أو تعذّر التحميل
        يمرّ الرمز null، والخادم يرفض (يلزم أرخص التأكد أنك إنسان).
        أي مشكلة تحميل = رسالة واضحة بدل «حاول مجدداً» لخداع المتصل. */
-    var tsWidget = null, tsToken = null, tsReady = false, tsLoaded = false;
+    var tsWidget = null, tsToken = null, tsReady = false, tsLoaded = false, tsBusy = false;
     function tsLog() { try { console.warn.apply(console, ['[chat]'].concat([].slice.call(arguments))); } catch (e) {} }
     function ensureTurnstile() {
       if (!TURNSTILE_SITEKEY || tsLoaded) return;
@@ -492,9 +492,9 @@
           tsWidget = window.turnstile.render(host, {
             sitekey: TURNSTILE_SITEKEY,
             size: 'invisible',
-            callback: function (t) { tsToken = t; },
+            callback: function (t) { tsToken = t; tsBusy = false; },
             ready: function () { tsReady = true; },
-            'error-callback': function () { tsLog('widget error-callback'); }
+            'error-callback': function () { tsLog('widget error-callback'); tsBusy = false; }
           });
           if (!tsWidget) tsLog('render returned nothing');
         } catch (e) { tsLog('render threw', e && e.message); }
@@ -502,45 +502,33 @@
       s.onerror = function () { tsLog('api.js blocked or failed to load'); };
       document.head.appendChild(s);
     }
-    /* يتحصّل رمز Turnstile مع انتظار جاهزية الودجت + محاولة ثانية عند التعليق.
-       يعيد null إذا تعذّر — والإرسال يبقى جارياً والخادم هو من يحسم. */
+    /* يحضّر رمزاً في الخلفية حتى يكون الإرسال فورياً (بدل انتظار الفحص مع كل رسالة). */
+    function primeToken() {
+      if (!TURNSTILE_SITEKEY || !window.turnstile || !tsWidget || !tsReady || tsBusy || tsToken) return;
+      tsBusy = true;
+      try { window.turnstile.execute(tsWidget); }
+      catch (e) { tsBusy = false; tsLog('prime execute threw', e && e.message); return; }
+      setTimeout(function () { if (tsBusy && !tsToken) tsBusy = false; }, 8000); // مهلة أمان
+    }
+    /* يستهلك الرمز المخزّن فوراً ويحضّر التالي. إن لم يتوفر خلال 1.5 ثانية
+       يُرسَل الطلب بدونه — الخادم هو من يحسم، ولا نحجب الزائر. */
     function withToken(cb) {
       if (!TURNSTILE_SITEKEY) return cb(null);
-      var tries = 0;
-      function attempt() {
-        tries++;
-        if (!window.turnstile || !tsWidget) {
-          if (tries < 10) return setTimeout(attempt, 600);   // انتظر تحميل المكتبة
-          tsLog('library/widget missing after', tries, 'tries');
-          return cb(null);
-        }
-        if (!tsReady && tries < 8) return setTimeout(attempt, 500); // انتظر إشارة ready
-        var settled = false, iv = null;
-        tsToken = null;
-        try { window.turnstile.execute(tsWidget); }
-        catch (e) {
-          tsLog('execute threw', e && e.message);
-          if (tries < 2) return setTimeout(attempt, 500);
-          return cb(null);
-        }
-        var tm = setTimeout(function () {
-          if (settled) return;
-          settled = true; clearInterval(iv);
-          if (tries < 2) {                       // محاولة ثانية بعد reset
-            try { window.turnstile.reset(tsWidget); } catch (e) {}
-            return setTimeout(attempt, 400);
-          }
-          tsLog('timeout after', tries, 'tries');
-          cb(null);
-        }, 9000);
-        iv = setInterval(function () {
-          if (tsToken && !settled) {
-            settled = true; clearTimeout(tm); clearInterval(iv);
-            cb(tsToken);
-          }
-        }, 120);
+      if (tsToken) {
+        var have = tsToken; tsToken = null; primeToken();
+        return cb(have);
       }
-      attempt();
+      var waited = 0;
+      var iv = setInterval(function () {
+        waited += 100;
+        if (tsToken) {
+          clearInterval(iv);
+          var t = tsToken; tsToken = null; primeToken();
+          cb(t);
+          return;
+        }
+        if (waited >= 1500) { clearInterval(iv); primeToken(); cb(null); }
+      }, 100);
     }
     ensureTurnstile();
 
@@ -573,6 +561,11 @@
             typeMessage(tp, 'تعذر الاتصال. يمكنك الحجز من free-session.html أو مراسلتي واتساب.', function () { busy = false; });
           });
       });
+    }
+    /* تحضير رمز الحماية مبكراً (عند فتح المحادثة/الكتابة) حتى لا ينتظر الزائر. */
+    if (inp) {
+      inp.addEventListener('focus', primeToken, { once: true });
+      inp.addEventListener('keydown', primeToken, { once: true });
     }
     if (form) form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -613,7 +606,7 @@
         add('bot', 'تم مسح المحادثة — ابدأ من جديد، كيف يمكنني مساعدتك؟');
       });
     }
-    if (chatFab) chatFab.addEventListener('click', function () { setTimeout(greet, 350); });
+    if (chatFab) chatFab.addEventListener('click', function () { primeToken(); setTimeout(greet, 350); });
     greet();
   })();
 
