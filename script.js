@@ -353,9 +353,55 @@
       s = s.replace(/<a\s+[^>]*href=["']?([^"'\s>]+)["']?[^>]*>([\s\S]*?)<\/a\s*>/gi, function (m, u, t) { return u; });
       // Any other stray tags -> remove
       s = s.replace(/<[^>\n]{0,80}>/g, '');
+      // Markdown code fences -> drop the markers, keep the code text
+      s = s.replace(/```[a-zA-Z0-9]*\n?/g, '');
+      // Markdown headings -> plain text (the # marks are not content)
+      s = s.replace(/^[ \t]*#{1,6}[ \t]+/gm, '');
+      // Markdown blockquote markers -> plain text
+      s = s.replace(/^[ \t]*>[ \t]?/gm, '');
+      // Markdown horizontal rules -> removed entirely
+      s = s.replace(/^[ \t]*(?:[-*_][ \t]*){3,}$/gm, '');
       // Markdown bold/italic markers -> plain text
       s = s.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/__([^_]+)__/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
       return s;
+    }
+    /* Splits one block into paragraph / list segments.
+       The model sometimes emits "- item" or "1. item" despite the output rule,
+       so we render them as real lists instead of showing literal dashes.
+       Returns an array of block-level HTML strings (never a list inside a <p>). */
+    function mdBlocks(block) {
+      var lines = block.split('\n'), out = [], buf = [], list = null, i, line, b, n;
+      function flushText() {
+        if (buf.length) { out.push('<p>' + buf.join('\n').replace(/\n/g, '<br>') + '</p>'); buf = []; }
+      }
+      function flushList() {
+        if (list) {
+          out.push('<' + list.tag + '>' + list.items.map(function (it) { return '<li>' + it + '</li>'; }).join('') + '</' + list.tag + '>');
+          list = null;
+        }
+      }
+      for (i = 0; i < lines.length; i++) {
+        line = lines[i];
+        b = line.match(/^[ \t]*[-*\u2022\u2013\u2014][ \t]+(.+)$/);   // - item  /  * item  /  • item
+        n = line.match(/^[ \t]*(\d{1,2})[.)][ \t]+(.+)$/);            // 1. item  /  1) item
+        if (b) {
+          flushText();
+          if (!list || list.tag !== 'ul') { flushList(); list = { tag: 'ul', items: [] }; }
+          list.items.push(b[1]);
+          continue;
+        }
+        if (n) {
+          flushText();
+          if (!list || list.tag !== 'ol') { flushList(); list = { tag: 'ol', items: [] }; }
+          list.items.push(n[2]);
+          continue;
+        }
+        flushList();
+        buf.push(line);
+      }
+      flushText();
+      flushList();
+      return out;
     }
     function linkify(s) {
       var e = esc(cleanModelText(s));
@@ -378,8 +424,8 @@
       });
       // 4) أسماء الصفحات — محميّة من أن تُلتقط داخل رابط أو href
       e = e.replace(/(^|[\s>(])((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build)\.html)\b/g, '$1<a href="$2">هنا</a>');
-      // Paragraphs: blank line -> new paragraph; single newline -> <br>
-      return e.split(/\n{2,}/).map(function (p) { return '<p>' + p.replace(/\n/g, '<br>') + '</p>'; }).join('');
+      // Paragraphs: blank line -> new paragraph; markdown lists -> real <ul>/<ol>; single newline -> <br>
+      return e.split(/\n{2,}/).map(function (p) { return mdBlocks(p).join(''); }).join('');
     }
     /* Split HTML into tokens (text / open tag / close tag / void tag). */
     function htmlTokens(html) {
@@ -417,7 +463,7 @@
       el.classList.add('ai-writing');
 
       function caret() {
-        ps = el.querySelectorAll('p');
+        ps = el.querySelectorAll('p, li');
         for (i = 0; i < ps.length - 1; i++) ps[i].classList.remove('typing');
         if (ps.length) ps[ps.length - 1].classList.add('typing');
       }
@@ -457,7 +503,7 @@
         if (ti < tokens.length) {
           setTimeout(tick, 18);
         } else {
-          ps = el.querySelectorAll('p');
+          ps = el.querySelectorAll('p, li');
           for (i = 0; i < ps.length; i++) ps[i].classList.remove('typing');
           el.classList.remove('ai-writing');
           if (done) done();

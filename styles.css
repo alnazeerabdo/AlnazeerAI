@@ -426,7 +426,12 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .ai-msg.bot a{color:var(--gold-deep);font-weight:700}
 .ai-msg p{margin:0 0 8px}
 .ai-msg p:last-child{margin-bottom:0}
+.ai-msg ul,.ai-msg ol{margin:0 0 8px;padding-inline-start:20px}
+.ai-msg li{margin:0 0 4px}
+.ai-msg li:last-child{margin-bottom:0}
+.ai-msg ul:last-child,.ai-msg ol:last-child{margin-bottom:0}
 .ai-msg p.typing::after{content:"";display:inline-block;width:2px;height:1.05em;background:var(--gold);margin-inline-start:3px;vertical-align:-2px;animation:aiBlink .9s steps(2,start) infinite}
+.ai-msg li.typing::after{content:"";display:inline-block;width:2px;height:1.05em;background:var(--gold);margin-inline-start:3px;vertical-align:-2px;animation:aiBlink .9s steps(2,start) infinite}
 @keyframes aiBlink{0%,50%{opacity:1}51%,100%{opacity:0}}
 .ai-typing{opacity:.9}
 .ai-dots{display:inline-flex;gap:5px;align-items:center;height:1.3em;padding:2px 0}
