@@ -29,9 +29,10 @@ rules = [
 
 # --- Vars ---
 # احظر أي موقع آخر من استخدام المساعد عبر المتصفح (لا يوقف curl، لكنه يوقف صفحات الأخطار).
-# إذا انتقلت إلى نطاق مخصص أضفه هنا بفواصل، وإلا يتوقف المساعد عن الرد.
+# كل نطاقات الموقع مسموحة هنا: النطاق المخصص + www + GitHub Pages.
+# ملاحظة: يطابق www وغير www تلقائياً.
 [vars]
-ALLOWED_ORIGINS = "https://alnazeerabdo.github.io"
+ALLOWED_ORIGINS = "https://alnazeer.me,https://www.alnazeer.me,https://alnazeerabdo.github.io,https://www.alnazeerabdo.github.io"
 
 # --- الحماية ---
 # 1) حدود KV: 30 طلب/دقيقة/IP + 150 طلب/يوم/IP + 50 رسالة/يوم/جلسة

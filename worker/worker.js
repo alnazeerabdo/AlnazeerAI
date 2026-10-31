@@ -50,6 +50,35 @@ function rankModel(id) {
   return i === -1 ? 99 : i;
 }
 
+// Extract a comparable host name (lower-case, "www." ignored).
+function hostOf(url) {
+  try {
+    return new URL(String(url)).hostname.toLowerCase().replace(/^www\./, '');
+  } catch (e) { return ''; }
+}
+
+// Match the request origin against the allow-list.
+// Supports: exact origins, host names, "www." / no-www, and "*.example.com".
+function originAllowed(allowed, origin) {
+  if (!origin || origin === 'null') return true; // same-origin / file://
+  var oh = hostOf(origin);
+  if (!oh) return false;
+  for (var i = 0; i < allowed.length; i++) {
+    var item = String(allowed[i]).trim();
+    if (!item) continue;
+    if (item === '*') return true;
+    var ah = hostOf(item.indexOf('://') === -1 ? 'https://' + item : item);
+    if (!ah) continue;
+    if (ah.slice(0, 2) === '*.') {
+      var base = ah.slice(2);
+      if (oh === base || oh.slice(-(base.length + 1)) === '.' + base) return true;
+    } else if (ah === oh) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function corsHeaders(env, origin) {
   const allowed = String(env.ALLOWED_ORIGINS || '')
     .split(',').map(function (s) { return s.trim(); }).filter(Boolean);
@@ -57,8 +86,8 @@ function corsHeaders(env, origin) {
   let allow = '*';
   if (allowed.length) {
     const o = origin || '';
-    // Missing / 'null' origin (same-origin or file://) can't be verified -> allow it.
-    allow = (!o || o === 'null' || allowed.indexOf(o) !== -1) ? (o || '*') : allowed[0];
+    // Missing / 'null' origin (curl, same-origin, file://) can't be verified -> allow it.
+    allow = (!o || o === 'null') ? '*' : (originAllowed(allowed, o) ? o : 'null');
   }
   return {
     'Access-Control-Allow-Origin': allow,
