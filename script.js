@@ -39,10 +39,11 @@
 
   // Active nav
   try {
-    var path = location.pathname.split('/').pop() || 'index.html';
+    var path = (location.pathname.split('/').pop() || 'index').replace(/\.html$/i, '') || 'index';
     document.querySelectorAll('.nav-links a').forEach(function (a) {
-      var href = a.getAttribute('href') || '';
-      if (href === path || (path === '' && href === 'index.html')) a.classList.add('active');
+      var href = (a.getAttribute('href') || '').split(/[?#]/)[0].replace(/^\.\//, '').replace(/\.html$/i, '');
+      if (href === '' || href === '/') href = 'index';
+      if (href === path) a.classList.add('active');
     });
   } catch (e) {}
 
@@ -229,7 +230,7 @@
     navLinks.prepend(dh);
     var dcta = document.createElement('div');
     dcta.className = 'drawer-cta';
-    dcta.innerHTML = '<a href="free-session.html" class="btn btn-primary">استشارة مجانية</a>';
+    dcta.innerHTML = '<a href="free-session" class="btn btn-primary">استشارة مجانية</a>';
     navLinks.appendChild(dcta);
     function sync() {
       var open = navLinks.classList.contains('open');
@@ -728,7 +729,7 @@
       add('bot', 'أهلاً بك، أنا مساعد الذكاء الاصطناعي الخاص بالنذير، يمكنني مساعدتك في كل ما تحتاج معرفته عن الخدمات والأسعار وحجز المواعيد مع النذير.');
     }
     function offline() {
-      add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="free-session.html">حجز استشارتك المجانية</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
+      add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="free-session">حجز استشارتك المجانية</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
     }
     /* لا كابتشا: الحماية عبر حدود KV + فلتر حقن + قفل النطاق في الخادم. */
     function send(q) {
@@ -765,7 +766,7 @@
           typeMessage(tp, t, function () { busy = false; });
         })
         .catch(function () {
-          typeMessage(tp, 'تعذر الاتصال. يمكنك الحجز من free-session.html أو مراسلتي واتساب.', function () { busy = false; });
+          typeMessage(tp, 'تعذر الاتصال. يمكنك الحجز من صفحة الاستشارة المجانية أو مراسلتي واتساب.', function () { busy = false; });
         });
     }
     if (form) form.addEventListener('submit', function (e) {
