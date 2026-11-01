@@ -94,7 +94,7 @@
 - project-sijilpro.html — سجل برو
 - project-spectrababy.html — متجر سبكترا
 - project-adyar.html — أديار
-- project-asmakeen.html — أساس مكين
+- project-asasmakeen.html — أساس مكين
 - project-shurfat.html — شرفات
 - project-rulva.html — رولفا
 
