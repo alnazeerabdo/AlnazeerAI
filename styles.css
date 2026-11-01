@@ -60,7 +60,15 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .btn-ghost{background:#fff;border-color:var(--border);color:var(--black)}
 .btn-ghost:hover{background:var(--black);border-color:var(--black);color:#fff;transform:translateY(-3px);box-shadow:var(--shadow-sm)}
 .btn-gold{background:var(--gold);color:var(--black);border-color:var(--gold)}
-.btn-gold:hover{background:#fff;color:var(--black);border-color:#fff;transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.btn-gold:hover{background:var(--black);color:var(--gold);border-color:var(--black);transform:translateY(-3px);box-shadow:var(--shadow-md)}
+/* Buttons sitting on dark surfaces (CTA band, contact box, footer) turn white on hover
+   so they never sink into the dark background and disappear. */
+.cta-band .btn-gold:hover,
+.cta-band .btn-primary:hover,
+.contact-box .btn-gold:hover,
+.contact-box .btn-primary:hover,
+.footer .btn-gold:hover,
+.footer .btn-primary:hover{background:#fff;color:var(--black);border-color:#fff;transform:translateY(-3px);box-shadow:var(--shadow-md)}
 .btn.full{width:100%}
 
 /* Hero */
@@ -467,8 +475,8 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
   .logo-img{height:30px;max-width:120px}
   .nav-actions{gap:6px}
   .menu-btn{width:36px;height:36px}
-  .about-grid .hero-cta{flex-wrap:wrap}
-  .about-grid .hero-cta .btn{flex:1 1 220px}
+  .about-grid .hero-cta{flex-wrap:nowrap;gap:8px}
+  .about-grid .hero-cta .btn{flex:1 1 0;min-width:0;white-space:nowrap;padding:12px 6px;font-size:12.5px}
 }
 @media(max-width:380px){
   .nav-links > a{font-size:15px;padding:11px 12px}
