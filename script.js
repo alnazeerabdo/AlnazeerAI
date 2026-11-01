@@ -486,9 +486,24 @@
       flushList();
       return out;
     }
+    function escapeRe(s) {
+      return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
     function aliasPart(part) {
-      /* نتجاهل الجملة التي تحوي اسم ملف أصلًا حتى لا يظهر «هنا» مرتين. */
-      if (/[a-z0-9-]+\.html/i.test(part)) return part;
+      /* إن ذكر النموذج اسم الصفحة بالعربي ثم كرره باسم الملف في نفس الجملة،
+         نحذف الذكر العربي حتى لا يظهر اسم الصفحة مرتين. */
+      if (/[a-z0-9-]+\.html/i.test(part)) {
+        var lower = part.toLowerCase();
+        for (var name in PAGE_TITLES) {
+          if (lower.indexOf(name) === -1) continue;
+          if (name === 'index.html') {
+            part = part.replace(/الصفحة\s+الرئيسية/g, '');
+            continue;
+          }
+          part = part.replace(new RegExp('صفحة\\s+' + escapeRe(PAGE_TITLES[name]) + '(?![\\u0600-\\u06FF])', 'g'), '');
+        }
+        return part.replace(/\s{2,}/g, ' ').replace(/^[\s،,]+/, '');
+      }
       return part
         .replace(/الصفحة\s+الرئيسية/g, 'صفحة index.html')
         .replace(/صفحة\s+(?:الاستشارات|الاستشارة)(?:\s+المجانية)?/g, 'صفحة free-session.html')
@@ -515,9 +530,52 @@
       if (buf) out += aliasPart(buf);
       return out;
     }
+    var PAGE_TITLES = {
+      'index.html': 'الصفحة الرئيسية',
+      'about.html': 'عن النذير',
+      'services.html': 'الخدمات',
+      'ai.html': 'خدمات الذكاء الاصطناعي',
+      'build.html': 'تطوير البرمجيات',
+      'ai-agents.html': 'وكلاء الذكاء الاصطناعي',
+      'custom-ai.html': 'حلول الذكاء الاصطناعي المخصصة',
+      'software.html': 'تطوير البرمجيات والأنظمة',
+      'projects.html': 'المشاريع',
+      'faq.html': 'الأسئلة الشائعة',
+      'contact.html': 'التواصل',
+      'free-session.html': 'الاستشارة المجانية',
+      'service-chatbots.html': 'روبوتات المحادثة',
+      'service-voice-agents.html': 'الوكلاء الصوتيون',
+      'service-automation.html': 'أتمتة العمليات',
+      'service-ai-agents.html': 'وكلاء الذكاء الاصطناعي',
+      'service-ai-integration.html': 'دمج الذكاء الاصطناعي',
+      'service-ai-business-systems.html': 'أنظمة الأعمال الذكية',
+      'service-custom-ai-solutions.html': 'حلول الذكاء الاصطناعي المخصصة',
+      'service-model-customization.html': 'تخصيص النماذج',
+      'service-websites.html': 'تطوير المواقع',
+      'service-stores.html': 'المتاجر الإلكترونية',
+      'service-apps.html': 'تطبيقات الجوال',
+      'service-company-systems.html': 'أنظمة الشركات',
+      'service-erp.html': 'ERP',
+      'service-crm.html': 'CRM',
+      'service-custom-systems.html': 'الأنظمة المخصصة',
+      'project-mudif.html': 'نظام إدارة المطعم',
+      'project-almadar.html': 'المدار CRM',
+      'project-sijilpro.html': 'سجل برو',
+      'project-spectrababy.html': 'متجر سبكترا',
+      'project-adyar.html': 'أديار',
+      'project-asasmakeen.html': 'أساس مكين',
+      'project-shurfat.html': 'شرفات',
+      'project-rulva.html': 'رولفا'
+    };
+    function pageTitle(name) {
+      return PAGE_TITLES[name] || name.replace(/\.html$/i, '');
+    }
+    function pageLabel(name) {
+      return (name === 'index.html' ? '' : 'صفحة ') + pageTitle(name) + ' هنا';
+    }
     function pageLink(name) {
       /* رابط مطلق على النطاق المخصص حتى يعمل حتى لو فُتح الموقع من رابط github.io أو خارج الموقع. */
-      return '<a class="page-link" href="https://alnazeer.me/' + name + '" title="اضغط لفتح الصفحة">هنا</a>';
+      return '<a class="page-link" href="https://alnazeer.me/' + name + '" title="اضغط لفتح ' + pageTitle(name) + '">' + pageLabel(name) + '</a>';
     }
     function linkify(s) {
       var e = esc(cleanModelText(s));
@@ -537,21 +595,26 @@
       // 4) رقم الواتساب يعرض كرابط يفتح واتساب مباشرة (بدل رقم)
       e = e.replace(/(?:\+\s*)?249[\s-]?117[\s-]?148[\s-]?664(?!\d)/g,
         '<a class="wa-link" href="https://wa.me/249117148664" target="_blank" rel="noopener">واتساب</a>');
-      // 5) رجّع الروابط (رابط واتساب «واتساب»، ورابط صفحة الموقع «هنا»)
+      // 5) رجّع الروابط (رابط واتساب «واتساب»، ورابط صفحة الموقع باسم الصفحة + «هنا»)
       e = e.replace(/\u0000(\d+)\u0000/g, function (_, i) {
         var u = urls[+i];
         var safe = u.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         var isWa = /wa\.me|whatsapp/i.test(u);
         var isPage = /^https?:\/\/(?:www\.)?alnazeer\.me(?:\/[a-z0-9-]+\.html)?(?:[?#].*)?$/i.test(u);
-        var label = isWa ? 'واتساب' : (isPage ? 'هنا' : 'رابط');
+        var pageName = 'index.html';
+        if (isPage) {
+          var pm = u.match(/alnazeer\.me\/([a-z0-9-]+\.html)/i);
+          if (pm) pageName = pm[1].toLowerCase();
+        }
+        var label = isWa ? 'واتساب' : (isPage ? pageLabel(pageName) : 'رابط');
         var cls = isWa ? 'wa-link' : (isPage ? 'page-link' : 'ext-link');
         return '<a class="' + cls + '" href="' + safe + '" target="_blank" rel="noopener">' + label + '</a>';
       });
-      // 6) أسماء الصفحات — محميّة من أن تُلتقط داخل رابط أو href
-      e = e.replace(/(^|[\s>(])((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build|index|service-[a-z0-9-]+|project-[a-z0-9-]+)\.html)\b/gi,
+      // 6) أسماء الصفحات — نبتلع «صفحة» التي قبل اسم الملف حتى لا تتكرر داخل الرابط
+      e = e.replace(/(^|[\s>(])(?:صفحة\s+)?((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build|index|service-[a-z0-9-]+|project-[a-z0-9-]+)\.html)\b/gi,
         function (_, pre, name) { return pre + pageLink(name.toLowerCase()); });
-      // 7) إزالة «من هنا» المكررة بعد أن صار اسم الصفحة رابط «هنا»
-      e = e.replace(/(<a class="page-link"[^>]*>هنا<\/a>)\s+من\s+هنا/g, '$1');
+      // 7) إزالة «هنا» أو «من هنا» المكررة بعد أن صار اسم الصفحة داخل الرابط ينتهي بـ «هنا»
+      e = e.replace(/(<a class="page-link"[^>]*>[^<]*هنا<\/a>)\s+(?:من\s+)?هنا/g, '$1');
       // Paragraphs: blank line -> new paragraph; markdown lists -> real <ul>/<ol>; single newline -> <br>
       return e.split(/\n{2,}/).map(function (p) { return mdBlocks(p).join(''); }).join('');
     }
