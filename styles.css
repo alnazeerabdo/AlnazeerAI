@@ -180,6 +180,10 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .socials a{width:40px;height:40px;border-radius:50%;background:#fff;border:1px solid var(--border);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--black);transition:all .35s var(--ease)}
 .socials a:hover{background:var(--black);border-color:var(--black);color:#fff;transform:translateY(-3px);box-shadow:var(--shadow-sm)}
 .socials a svg{width:17px;height:17px;fill:currentColor;display:block}
+/* WhatsApp badge — brand green so it is instantly recognisable next to the grey socials */
+.socials a[aria-label="واتساب"]{color:#25D366;border-color:rgba(37,211,102,.4)}
+.socials a[aria-label="واتساب"] svg{width:19px;height:19px}
+.socials a[aria-label="واتساب"]:hover{background:#25D366;border-color:#25D366;color:#fff}
 
 /* Contact */
 .contact-box{background:linear-gradient(180deg,var(--ink),var(--black));color:#fff;border-radius:26px;padding:44px;text-align:center;border:1px solid var(--black)}
