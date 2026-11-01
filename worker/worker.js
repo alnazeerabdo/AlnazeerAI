@@ -223,7 +223,7 @@ export default {
       // --- 3) رفض محاولات حقن التعليمات / كسر القواعد (بلا استهلاك توكنات) ---
       const lastUser = messages.slice().reverse().find(function (m) { return m.role === 'user'; });
       if (lastUser && INJECTION.test(String(lastUser.content))) {
-        return new Response(JSON.stringify({ text: 'لا أستطيع مساعدتك في ذلك. يمكنني الإجابة عن أسئلتك عن خدمات النذير ومشاريعه، أو حجز استشارة مجانية له.' }), { headers: { ...cors, 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ text: 'لا أستطيع مساعدتك في ذلك. يمكنني الإجابة عن أسئلتك عن خدمات النذير ومشاريعه، أو توجيهك للتواصل معي.' }), { headers: { ...cors, 'Content-Type': 'application/json' } });
       }
 
       // Discover available chat models once per isolate (self-heals when Groq retires a model).

@@ -135,7 +135,6 @@
       var name = (document.getElementById('fullName') || {}).value || '';
       var phone = (document.getElementById('phone') || {}).value || '';
       var email = (document.getElementById('email') || {}).value || '';
-      var work = (document.getElementById('workType') || {}).value || '';
       var problem = (document.getElementById('problem') || {}).value || '';
       var sizeEl = document.getElementById('workSize');
       var size = sizeEl ? sizeEl.value.trim() : '';
@@ -155,7 +154,7 @@
           submitBtn.innerHTML = submitHtml;
         }
       }
-      name = name.trim(); phone = phone.trim(); email = email.trim(); work = work.trim(); problem = problem.trim();
+      name = name.trim(); phone = phone.trim(); email = email.trim(); problem = problem.trim();
       function say(msg, ok) {
         if (!noteEl) return;
         noteEl.style.color = ok ? '#1a7f37' : '#b42318';
@@ -181,8 +180,8 @@
           if (noteEl) noteEl.textContent = '';
         });
       }
-      if (!name || !phone || !work || !problem || !size) {
-        say('يرجى تعبئة جميع الحقول المطلوبة حتى أجهز لك الاستشارة بشكل صحيح.', false);
+      if (!name || !phone || !problem || !size) {
+        say('يرجى تعبئة جميع الحقول المطلوبة حتى أتمكن من التواصل معك.', false);
         return;
       }
       if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -197,7 +196,7 @@
         fd.append(GOOGLE_FORM_CONFIG.fields.name, name);
         fd.append(GOOGLE_FORM_CONFIG.fields.phone, phone);
         fd.append(GOOGLE_FORM_CONFIG.fields.email, email);
-        fd.append(GOOGLE_FORM_CONFIG.fields.work, work);
+        fd.append(GOOGLE_FORM_CONFIG.fields.work, '');
         fd.append(GOOGLE_FORM_CONFIG.fields.problem, problem);
         fd.append(GOOGLE_FORM_CONFIG.fields.size, size);
         fetch(GOOGLE_FORM_CONFIG.actionUrl, { method: 'POST', mode: 'no-cors', body: fd })
@@ -230,7 +229,7 @@
     navLinks.prepend(dh);
     var dcta = document.createElement('div');
     dcta.className = 'drawer-cta';
-    dcta.innerHTML = '<a href="free-session" class="btn btn-primary">استشارة مجانية</a>';
+    dcta.innerHTML = '<a href="contact" class="btn btn-primary">اتصل بي</a>';
     navLinks.appendChild(dcta);
     function sync() {
       var open = navLinks.classList.contains('open');
@@ -507,7 +506,7 @@
       }
       return part
         .replace(/الصفحة\s+الرئيسية/g, 'صفحة index.html')
-        .replace(/صفحة\s+(?:الاستشارات|الاستشارة)(?:\s+المجانية)?/g, 'صفحة free-session.html')
+        .replace(/صفحة\s+(?:الاستشارات|الاستشارة)(?:\s+المجانية)?/g, 'صفحة contact.html')
         .replace(/صفحة\s+الخدمات/g, 'صفحة services.html')
         .replace(/صفحة\s+المشاريع/g, 'صفحة projects.html')
         .replace(/صفحة\s+(?:التواصل|الاتصال)/g, 'صفحة contact.html')
@@ -542,8 +541,7 @@
       'software.html': 'تطوير البرمجيات والأنظمة',
       'projects.html': 'المشاريع',
       'faq.html': 'الأسئلة الشائعة',
-      'contact.html': 'التواصل',
-      'free-session.html': 'الاستشارة المجانية',
+      'contact.html': 'اتصل بي',
       'service-chatbots.html': 'روبوتات المحادثة',
       'service-voice-agents.html': 'الوكلاء الصوتيون',
       'service-automation.html': 'أتمتة العمليات',
@@ -587,6 +585,8 @@
       var e = esc(cleanModelText(s));
       // 1) روابط الموقع القديمة (github.io) -> النطاق المخصص
       e = e.replace(/https?:\/\/(?:www\.)?alnazeerabdo\.github\.io\/(?:alnazeerdev|alnazeerai)\/?/gi, 'https://alnazeer.me/');
+      // 1.5) صفحات ملغاة -> صفحة الاتصال
+      e = e.replace(/free-session\.html/gi, 'contact.html');
       // 2) أسماء الصفحات العربية -> اسم الملف
       e = pageAlias(e);
       // 3) استخرج الروابط أولاً (بـ placeholder) حتى لا تُمسّ أرقام الواتساب داخل الـ href
@@ -729,7 +729,7 @@
       add('bot', 'أهلاً بك، أنا مساعد الذكاء الاصطناعي الخاص بالنذير، يمكنني مساعدتك في كل ما تحتاج معرفته عن الخدمات والأسعار وحجز المواعيد مع النذير.');
     }
     function offline() {
-      add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="free-session">حجز استشارتك المجانية</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
+      add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="contact">إرسال طلبك</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
     }
     /* لا كابتشا: الحماية عبر حدود KV + فلتر حقن + قفل النطاق في الخادم. */
     function send(q) {
