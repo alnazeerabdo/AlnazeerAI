@@ -423,7 +423,9 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .ai-msg{max-width:88%;padding:9px 13px;border-radius:14px;font-size:14px;line-height:1.7}
 .ai-msg.bot{background:#fff;border:1px solid var(--border);align-self:flex-start}
 .ai-msg.user{background:var(--black);color:#fff;align-self:flex-end}
-.ai-msg.bot a{color:var(--gold-deep);font-weight:700}
+.ai-msg.bot a{color:var(--gold-deep);font-weight:700;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px;background:rgba(233,180,76,.16);border:1px solid rgba(233,180,76,.5);border-radius:6px;padding:0 5px;white-space:nowrap;transition:background .2s,color .2s,border-color .2s}
+.ai-msg.bot a::after{content:" ↗";font-size:.82em;line-height:1}
+.ai-msg.bot a:hover{background:var(--gold);color:var(--black);border-color:var(--gold)}
 .ai-msg p{margin:0 0 8px}
 .ai-msg p:last-child{margin-bottom:0}
 .ai-msg ul,.ai-msg ol{margin:0 0 8px;padding-inline-start:20px}

@@ -307,8 +307,9 @@
     /* ---- ذاكرة المحادثة (تبقى عبر الصفحات لأن الموقع صفحات متعددة) ----
        نحتفظ بآخر MAX_HIST رسالة في sessionStorage، ونرسل SEND_WINDOW نصاً كاملاً،
        وما قبلها ملخّصاً مضغوطاً (digest) حتى يظل المساعد يتذكر محادثته بلا توكنات زائدة. */
-    var MAX_HIST = 40, SEND_WINDOW = 16, DIGEST_CAP = 1200;
+    var MAX_HIST = 60, SEND_WINDOW = 16, DIGEST_CAP = 2200;
     var K_HIST = 'alnazeer_chat_hist', K_TR = 'alnazeer_chat_view';
+    var K_FACTS = 'alnazeer_chat_facts', K_PIN = 'alnazeer_chat_pin';
     function store(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
     function read(k) { try { var v = JSON.parse(sessionStorage.getItem(k) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
     function loadHist() {
@@ -328,9 +329,91 @@
         s += (old[i].role === 'user' ? 'س: ' : 'ن: ') + String(old[i].content).replace(/\s+/g, ' ').slice(0, 140) + '\n';
       }
       s = s.trim();
-      return s.length > DIGEST_CAP ? s.slice(-DIGEST_CAP) : s;
+      /* لا تقصّ بداية المحادثة فقط: الاسم غالباً في أول رسالة، لذا نحتفظ ببداية الملخّص ونهايته. */
+      if (s.length > DIGEST_CAP) {
+        var tail = Math.floor(DIGEST_CAP * 0.6);
+        var head = DIGEST_CAP - tail - 3;
+        s = s.slice(0, head).trim() + '\n…\n' + s.slice(-tail).trim();
+      }
+      return s;
     }
-    var hist = loadHist(), busy = false, lastSend = 0;
+    function readObj(k) {
+      try {
+        var v = JSON.parse(sessionStorage.getItem(k) || '{}');
+        return v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+      } catch (e) { return {}; }
+    }
+    function saveObj(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    function cleanFact(v, max) {
+      return String(v == null ? '' : v).replace(/[\r\n]+/g, ' ').replace(/[«»"]/g, '')
+        .replace(/\s+/g, ' ').trim().slice(0, max);
+    }
+    var NAME_STOP = /^(?:و|أو|او|من|في|عندي|أعمل|اعمل|أشتغل|اشتغل|أدرس|ادرس|طالب|مدير|صاحب|مهندس|مطور|ساكن|أسكن|اسكن|عمري|سنة|خبرة|مشروع|شركة|مطعم|متجر|موقع|تطبيق|أريد|أبغى|ابغى|أبي|ابي|أنا|انا|أنت|انت|لا|ما|أعرف|اعرف|أدري|ادري|أذكر|اذكر|ماعرف|رقمي|جوالي|جوالـي|هاتفي|بريدي|إيميلي|ايميلي|واتساب|واتس|and|from|i|a|an|the|my|email|phone|number|mobile|whatsapp)$/i;
+    function extractFacts(text, f) {
+      f = f && typeof f === 'object' ? f : {};
+      var t = String(text || '');
+      if (!f.name) {
+        var m = t.match(/(?:اسمي|اسمى|إسمي|إسمى|أنا\s+اسمي|انا\s+اسمي|أنا\s+اسمى|انا\s+اسمى)\s*[:：\-]?\s*([\u0600-\u06FFA-Za-z][\u0600-\u06FFA-Za-z'’\- ]{0,40})/i);
+        if (m) {
+          var words = m[1].replace(/[،,.!؟?؛:()]/g, ' ').trim().split(/\s+/);
+          if (words.length && /^(?:هو|هي)$/.test(words[0])) words.shift();
+          var name = [];
+          for (var i = 0; i < words.length && name.length < 4; i++) {
+            var w = words[i];
+            var bare = w.replace(/^و/, '');
+            if (NAME_STOP.test(w) || NAME_STOP.test(bare)) break;
+            name.push(w);
+          }
+          var nm = cleanFact(name.join(' '), 40);
+          if (nm.length >= 2) f.name = nm;
+        }
+      }
+      if (!f.name) {
+        var en = t.match(/my\s+name\s+is\s+([A-Za-z][A-Za-z'’\-]*(?:\s+[A-Za-z][A-Za-z'’\-]*){0,2})/i);
+        if (en) {
+          var enName = cleanFact(en[1].replace(/\s+(?:and|from|i|a|an|the|my)\b.*$/i, ''), 40);
+          if (enName.length >= 2) f.name = enName;
+        }
+      }
+      if (!f.contact) {
+        var mail = t.match(/[^\s@]+@[^\s@]+\.[^\s@]{2,}/);
+        if (mail) f.contact = cleanFact(mail[0], 80);
+      }
+      if (!f.contact) {
+        var phone = t.match(/(?:\+|00)?\d[\d\s\-()]{7,}\d/);
+        if (phone && phone[0].replace(/\D/g, '').length >= 7) f.contact = cleanFact(phone[0], 40);
+      }
+      if (!f.work) {
+        var wm = t.match(/(?:أعمل|اعمل|أشتغل|اشتغل)\s+(?:في\s+|ب\s*)?([\u0600-\u06FFA-Za-z0-9][^،,.!؟?\n]{1,50})/);
+        if (wm) {
+          var wk = cleanFact(wm[1].split(/\s+(?:و|ثم|لكن)\s+|\s+و(?=[\u0600-\u06FF])/)[0], 60);
+          if (wk.length >= 3) f.work = wk;
+        }
+      }
+      return f;
+    }
+    /* إذا سأل المساعد «ما اسمك؟» وجاء الرد اسماً قصيراً وحده (بلا «اسمي»)، نلتقطه أيضاً. */
+    function captureNameReply(q, h, f) {
+      if (f.name || !h.length) return f;
+      var last = h[h.length - 1];
+      if (!last || last.role !== 'assistant') return f;
+      if (!/(?:ما|ايش|إيش|وش|شنو)\s+(?:اسمك|إسمك)|(?:اسمك|إسمك)|your\s+name/i.test(String(last.content))) return f;
+      var cand = cleanFact(q, 40).replace(/[.!؟?،,؛:()]+/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!cand) return f;
+      cand = cand.replace(/^(?:أهلاً|اهلا|أهلا|مرحباً|مرحبا|هلا|السلام\s+عليكم|أنا|انا|معك|معايا|معاي)\s+/i, '');
+      var parts = cand.split(/\s+/), name = [];
+      for (var i = 0; i < parts.length && name.length < 4; i++) {
+        var w = parts[i], bare = w.replace(/^و/, '');
+        if (NAME_STOP.test(w) || NAME_STOP.test(bare) || /\d|@|https?:/i.test(w)) break;
+        name.push(w);
+      }
+      var nm = cleanFact(name.join(' '), 40);
+      if (nm.length >= 2) f.name = nm;
+      return f;
+    }
+    var hist = loadHist(), facts = readObj(K_FACTS), pinned = '';
+    try { pinned = sessionStorage.getItem(K_PIN) || ''; } catch (e) {}
+    var busy = false, lastSend = 0;
     /* معرّف المحادثة: ثابت لكل جلسة/تبويب، يُرسل مع كل رسالة ليُفرَّق بين المحادثات في السجل. */
     function sessionId() {
       var k = 'alnazeer_chat_session';
@@ -403,27 +486,72 @@
       flushList();
       return out;
     }
+    function aliasPart(part) {
+      /* نتجاهل الجملة التي تحوي اسم ملف أصلًا حتى لا يظهر «هنا» مرتين. */
+      if (/[a-z0-9-]+\.html/i.test(part)) return part;
+      return part
+        .replace(/الصفحة\s+الرئيسية/g, 'صفحة index.html')
+        .replace(/صفحة\s+(?:الاستشارات|الاستشارة)(?:\s+المجانية)?/g, 'صفحة free-session.html')
+        .replace(/صفحة\s+الخدمات/g, 'صفحة services.html')
+        .replace(/صفحة\s+المشاريع/g, 'صفحة projects.html')
+        .replace(/صفحة\s+(?:التواصل|الاتصال)/g, 'صفحة contact.html')
+        .replace(/صفحة\s+الأسئلة(?:\s+الشائعة)?/g, 'صفحة faq.html')
+        .replace(/صفحة\s+(?:عن\s+النذير|عني|من\s+أنا)/g, 'صفحة about.html')
+        .replace(/صفحة\s+وكلاء\s+الذكاء\s+الاصطناعي/g, 'صفحة ai-agents.html')
+        .replace(/صفحة\s+(?:الذكاء\s+الاصطناعي\s+المخصص|الحلول\s+المخصصة)/g, 'صفحة custom-ai.html')
+        .replace(/صفحة\s+الذكاء\s+الاصطناعي/g, 'صفحة ai.html')
+        .replace(/صفحة\s+تطوير\s+البرمجيات/g, 'صفحة build.html');
+    }
+    function pageAlias(s) {
+      /* إن كتب النموذج اسم الصفحة بالعربي بدل اسم الملف، نحوّله لاسم الملف
+         لتلتقطه قاعدة الروابط ويظهر «هنا» قابلاً للضغط. */
+      var out = '', buf = '';
+      for (var i = 0; i < s.length; i++) {
+        var ch = s.charAt(i);
+        buf += ch;
+        var atEnd = (ch === '\n') || (/[.!؟?]/.test(ch) && (i + 1 >= s.length || /\s/.test(s.charAt(i + 1))));
+        if (atEnd) { out += aliasPart(buf); buf = ''; }
+      }
+      if (buf) out += aliasPart(buf);
+      return out;
+    }
+    function pageLink(name) {
+      /* رابط مطلق على النطاق المخصص حتى يعمل حتى لو فُتح الموقع من رابط github.io أو خارج الموقع. */
+      return '<a class="page-link" href="https://alnazeer.me/' + name + '" title="اضغط لفتح الصفحة">هنا</a>';
+    }
     function linkify(s) {
       var e = esc(cleanModelText(s));
-      // 1) استخرج الروابط أولاً (بـ placeholder) حتى لا تُمسّ أرقام الواتساب داخل الـ href
+      // 1) روابط الموقع القديمة (github.io) -> النطاق المخصص
+      e = e.replace(/https?:\/\/(?:www\.)?alnazeerabdo\.github\.io\/(?:alnazeerdev|alnazeerai)\/?/gi, 'https://alnazeer.me/');
+      // 2) أسماء الصفحات العربية -> اسم الملف
+      e = pageAlias(e);
+      // 3) استخرج الروابط أولاً (بـ placeholder) حتى لا تُمسّ أرقام الواتساب داخل الـ href
       var urls = [];
       e = e.replace(/https?:\/\/[^\s<&)]+/g, function (u) {
         u = u.replace(/[.,;:،؟!]+$/, '');
         urls.push(u);
         return '\u0000' + (urls.length - 1) + '\u0000';
       });
-      // 2) رقم الواتساب يعرض كرابط يفتح واتساب مباشرة (بدل رقم)
+      // 3.5) «في ملف X.html» -> «عبر صفحة X.html»
+      e = e.replace(/(?:في|من|داخل)\s+ملف\s+([a-z0-9-]+\.html)/gi, 'عبر صفحة $1');
+      // 4) رقم الواتساب يعرض كرابط يفتح واتساب مباشرة (بدل رقم)
       e = e.replace(/(?:\+\s*)?249[\s-]?117[\s-]?148[\s-]?664(?!\d)/g,
-        '<a href="https://wa.me/249117148664" target="_blank" rel="noopener">واتساب</a>');
-      // 3) رجّع الروابط (رابط واتساب يُكتب «واتساب» بدل «رابط»)
+        '<a class="wa-link" href="https://wa.me/249117148664" target="_blank" rel="noopener">واتساب</a>');
+      // 5) رجّع الروابط (رابط واتساب «واتساب»، ورابط صفحة الموقع «هنا»)
       e = e.replace(/\u0000(\d+)\u0000/g, function (_, i) {
         var u = urls[+i];
         var safe = u.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        var label = /wa\.me|whatsapp/i.test(u) ? 'واتساب' : 'رابط';
-        return '<a href="' + safe + '" target="_blank" rel="noopener">' + label + '</a>';
+        var isWa = /wa\.me|whatsapp/i.test(u);
+        var isPage = /^https?:\/\/(?:www\.)?alnazeer\.me(?:\/[a-z0-9-]+\.html)?(?:[?#].*)?$/i.test(u);
+        var label = isWa ? 'واتساب' : (isPage ? 'هنا' : 'رابط');
+        var cls = isWa ? 'wa-link' : (isPage ? 'page-link' : 'ext-link');
+        return '<a class="' + cls + '" href="' + safe + '" target="_blank" rel="noopener">' + label + '</a>';
       });
-      // 4) أسماء الصفحات — محميّة من أن تُلتقط داخل رابط أو href
-      e = e.replace(/(^|[\s>(])((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build)\.html)\b/g, '$1<a href="$2">هنا</a>');
+      // 6) أسماء الصفحات — محميّة من أن تُلتقط داخل رابط أو href
+      e = e.replace(/(^|[\s>(])((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build|index|service-[a-z0-9-]+|project-[a-z0-9-]+)\.html)\b/gi,
+        function (_, pre, name) { return pre + pageLink(name.toLowerCase()); });
+      // 7) إزالة «من هنا» المكررة بعد أن صار اسم الصفحة رابط «هنا»
+      e = e.replace(/(<a class="page-link"[^>]*>هنا<\/a>)\s+من\s+هنا/g, '$1');
       // Paragraphs: blank line -> new paragraph; markdown lists -> real <ul>/<ol>; single newline -> <br>
       return e.split(/\n{2,}/).map(function (p) { return mdBlocks(p).join(''); }).join('');
     }
@@ -545,6 +673,14 @@
       if (busy || now - lastSend < 5000) { add('bot', 'مهلاً قليلاً…'); return; }
       busy = true; lastSend = now;
       var tp = add('bot ai-typing', DOTS_HTML);
+      /* أول رسالة تُحفظ منفصلة حتى لا يضيع اسم الزائر إذا طالت المحادثة. */
+      if (!pinned) {
+        pinned = q.slice(0, 300);
+        try { sessionStorage.setItem(K_PIN, pinned); } catch (e) {}
+      }
+      facts = extractFacts(q, facts);
+      facts = captureNameReply(q, hist, facts);
+      saveObj(K_FACTS, facts);
       hist.push({ role: 'user', content: q });
       hist = hist.slice(-MAX_HIST);
       pushView('u', q); saveHist();
@@ -552,6 +688,8 @@
       var digest = buildDigest(hist);
       var payload = { messages: recent, session: sessionId(), page: location.pathname };
       if (digest) payload.digest = digest;
+      if (pinned) payload.pinned = pinned;
+      if (facts.name || facts.contact || facts.work) payload.facts = facts;
       fetch(AI_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
         .then(function (r) { return r.json(); })
         .then(function (j) {
@@ -597,8 +735,13 @@
         if (chatFab) { chatFab.classList.remove('open'); chatFab.setAttribute('aria-expanded', 'false'); }
       });
       clearBtn.addEventListener('click', function () {
-        hist = [];
-        try { sessionStorage.removeItem(K_HIST); sessionStorage.removeItem(K_TR); } catch (e) {}
+        hist = []; facts = {}; pinned = '';
+        try {
+          sessionStorage.removeItem(K_HIST);
+          sessionStorage.removeItem(K_TR);
+          sessionStorage.removeItem(K_FACTS);
+          sessionStorage.removeItem(K_PIN);
+        } catch (e) {}
         if (log) log.innerHTML = '';
         if (chips) chips.hidden = false;
         add('bot', 'تم مسح المحادثة — ابدأ من جديد، كيف يمكنني مساعدتك؟');
