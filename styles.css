@@ -60,7 +60,7 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .btn-ghost{background:#fff;border-color:var(--border);color:var(--black)}
 .btn-ghost:hover{background:var(--black);border-color:var(--black);color:#fff;transform:translateY(-3px);box-shadow:var(--shadow-sm)}
 .btn-gold{background:var(--gold);color:var(--black);border-color:var(--gold)}
-.btn-gold:hover{background:var(--black);color:var(--gold);border-color:var(--black);transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.btn-gold:hover{background:#fff;color:var(--black);border-color:#fff;transform:translateY(-3px);box-shadow:var(--shadow-md)}
 .btn.full{width:100%}
 
 /* Hero */
