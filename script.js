@@ -573,9 +573,14 @@
     function pageLabel(name) {
       return (name === 'index.html' ? '' : 'صفحة ') + pageTitle(name) + ' هنا';
     }
+    function pageHref(name) {
+      /* روابط نظيفة بلا .html — الصفحة الرئيسية بلا اسمها */
+      var slug = name.replace(/\.html$/i, '');
+      return slug === 'index' ? 'https://alnazeer.me/' : 'https://alnazeer.me/' + slug;
+    }
     function pageLink(name) {
       /* رابط مطلق على النطاق المخصص حتى يعمل حتى لو فُتح الموقع من رابط github.io أو خارج الموقع. */
-      return '<a class="page-link" href="https://alnazeer.me/' + name + '" title="اضغط لفتح ' + pageTitle(name) + '">' + pageLabel(name) + '</a>';
+      return '<a class="page-link" href="' + pageHref(name) + '" title="اضغط لفتح ' + pageTitle(name) + '">' + pageLabel(name) + '</a>';
     }
     function linkify(s) {
       var e = esc(cleanModelText(s));
@@ -600,15 +605,12 @@
         var u = urls[+i];
         var safe = u.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         var isWa = /wa\.me|whatsapp/i.test(u);
-        var isPage = /^https?:\/\/(?:www\.)?alnazeer\.me(?:\/[a-z0-9-]+\.html)?(?:[?#].*)?$/i.test(u);
-        var pageName = 'index.html';
-        if (isPage) {
-          var pm = u.match(/alnazeer\.me\/([a-z0-9-]+\.html)/i);
-          if (pm) pageName = pm[1].toLowerCase();
-        }
+        var pm = u.match(/^https?:\/\/(?:www\.)?alnazeer\.me(?:\/([a-z0-9-]+)(?:\.html)?)?\/?(?:[?#].*)?$/i);
+        var isPage = !!pm;
+        var pageName = (pm && pm[1] ? pm[1].toLowerCase() : 'index') + '.html';
         var label = isWa ? 'واتساب' : (isPage ? pageLabel(pageName) : 'رابط');
         var cls = isWa ? 'wa-link' : (isPage ? 'page-link' : 'ext-link');
-        return '<a class="' + cls + '" href="' + safe + '" target="_blank" rel="noopener">' + label + '</a>';
+        return '<a class="' + cls + '" href="' + (isPage ? pageHref(pageName) : safe) + '" target="_blank" rel="noopener">' + label + '</a>';
       });
       // 6) أسماء الصفحات — نبتلع «صفحة» التي قبل اسم الملف حتى لا تتكرر داخل الرابط
       e = e.replace(/(^|[\s>(])(?:صفحة\s+)?((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build|index|service-[a-z0-9-]+|project-[a-z0-9-]+)\.html)\b/gi,
