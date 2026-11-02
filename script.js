@@ -1,4 +1,4 @@
-/* Shared interactions: nav, reveal, counters, FAQ, booking form -> Google Form */
+/* Shared interactions: nav, reveal, counters, booking form -> Google Form */
 (function () {
   'use strict';
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -103,28 +103,6 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   if (toTop) toTop.addEventListener('click', function () {
     window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
-  });
-
-  // FAQ accordion
-  document.querySelectorAll('.faq-item').forEach(function (item) {
-    var q = item.querySelector('.faq-q');
-    var a = item.querySelector('.faq-a');
-    if (!q || !a) return;
-    q.addEventListener('click', function () {
-      var isOpen = item.classList.contains('open');
-      document.querySelectorAll('.faq-item.open').forEach(function (o) {
-        o.classList.remove('open');
-        var oa = o.querySelector('.faq-a');
-        if (oa) oa.style.maxHeight = null;
-        var ob = o.querySelector('.faq-q');
-        if (ob) ob.setAttribute('aria-expanded', 'false');
-      });
-      if (!isOpen) {
-        item.classList.add('open');
-        a.style.maxHeight = a.scrollHeight + 'px';
-        q.setAttribute('aria-expanded', 'true');
-      }
-    });
   });
 
   // Booking form -> Google Form (or fallback)
@@ -528,7 +506,6 @@
         .replace(/صفحة\s+الخدمات/g, 'صفحة services.html')
         .replace(/صفحة\s+المشاريع/g, 'صفحة projects.html')
         .replace(/صفحة\s+(?:التواصل|الاتصال)/g, 'صفحة contact.html')
-        .replace(/صفحة\s+الأسئلة(?:\s+الشائعة)?/g, 'صفحة faq.html')
         .replace(/صفحة\s+(?:عن\s+النذير|عني|من\s+أنا)/g, 'صفحة about.html')
         .replace(/صفحة\s+وكلاء\s+الذكاء\s+الاصطناعي/g, 'صفحة ai-agents.html')
         .replace(/صفحة\s+(?:الذكاء\s+الاصطناعي\s+المخصص|الحلول\s+المخصصة)/g, 'صفحة custom-ai.html')
@@ -558,7 +535,6 @@
       'custom-ai.html': 'حلول الذكاء الاصطناعي المخصصة',
       'software.html': 'تطوير البرمجيات والأنظمة',
       'projects.html': 'المشاريع',
-      'faq.html': 'الأسئلة الشائعة',
       'contact.html': 'اتصل بي',
       'service-chatbots.html': 'روبوتات المحادثة',
       'service-voice-agents.html': 'الوكلاء الصوتيون',
@@ -632,7 +608,7 @@
         return '<a class="' + cls + '" href="' + (isPage ? pageHref(pageName) : safe) + '" target="_blank" rel="noopener">' + label + '</a>';
       });
       // 6) أسماء الصفحات — نبتلع «صفحة» التي قبل اسم الملف حتى لا تتكرر داخل الرابط
-      e = e.replace(/(^|[\s>(])(?:صفحة\s+)?((?:free-session|services|contact|faq|projects|about|ai-agents|custom-ai|software|ai|build|index|service-[a-z0-9-]+|project-[a-z0-9-]+)\.html)\b/gi,
+      e = e.replace(/(^|[\s>(])(?:صفحة\s+)?((?:free-session|services|contact|projects|about|ai-agents|custom-ai|software|ai|build|index|service-[a-z0-9-]+|project-[a-z0-9-]+)\.html)\b/gi,
         function (_, pre, name) { return pre + pageLink(name.toLowerCase()); });
       // 7) إزالة «هنا» أو «من هنا» المكررة بعد أن صار اسم الصفحة داخل الرابط ينتهي بـ «هنا»
       e = e.replace(/(<a class="page-link"[^>]*>[^<]*هنا<\/a>)\s+(?:من\s+)?هنا/g, '$1');
