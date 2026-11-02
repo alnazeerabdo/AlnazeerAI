@@ -835,20 +835,26 @@
     greet();
   })();
 
-  /* ===== AI assistant nudge =====
-     بعد 10 ثوانٍ من دخول الزائر نعرض تلميحاً صغيراً عن المساعد الذكي.
+  /* ===== Contact button nudge =====
+     بعد 10 ثوانٍ من دخول الزائر نعرض تلميحاً صغيراً بجانب زر التواصل.
      إغلاقه (بالزر أو بالضغط في أي مكان) يُسجَّل في localStorage، ولا يعود
-     لدقيقتين حتى لو حدّث الزائر الصفحة. */
+     لدقيقتين حتى لو حدّث الزائر الصفحة.
+     زر المساعد الذكي مخفي حالياً من CSS، لذا يظهر التلميح بجانب زر الواتساب؛
+     عند إعادة إظهار زر المساعد يعود التلميح إليه تلقائياً بنفس القواعد. */
   (function () {
-    if (!chatFab) return;
-    var K_TIP = 'alnazeer_ai_tip_closed';
+    var aiHidden = !chatFab || getComputedStyle(chatFab).display === 'none';
+    var target = aiHidden ? document.querySelector('.wa-fab') : chatFab;
+    if (!target) return;
+    var K_TIP = aiHidden ? 'alnazeer_wa_tip_closed' : 'alnazeer_ai_tip_closed';
     var TIP_SHOW_AFTER = 10000, TIP_LINGER = 12000, TIP_RESHOW_AFTER = 120000;
     var tip = document.createElement('div');
-    tip.className = 'ai-tip';
+    tip.className = aiHidden ? 'ai-tip wa-tip' : 'ai-tip';
     tip.setAttribute('role', 'status');
     var tipText = document.createElement('span');
     tipText.className = 'ai-tip-text';
-    tipText.textContent = 'تحتاج مساعدة؟ المساعد الذكي يرد عليك فوراً';
+    tipText.textContent = aiHidden
+      ? 'عندك استفسار؟ راسلني على واتساب وأرد عليك بنفسي'
+      : 'تحتاج مساعدة؟ المساعد الذكي يرد عليك فوراً';
     var tipX = document.createElement('button');
     tipX.className = 'ai-tip-x';
     tipX.type = 'button';
@@ -866,7 +872,7 @@
       try { localStorage.setItem(K_TIP, String(Date.now())); } catch (e) {}
     }
     tipX.addEventListener('click', function (e) { e.stopPropagation(); hideTip(); });
-    chatFab.addEventListener('click', hideTip);
+    target.addEventListener('click', hideTip);
     document.addEventListener('click', function (e) {
       if (tip.classList.contains('show') && !tip.contains(e.target)) hideTip();
     });
