@@ -1,0 +1,32 @@
+# النذير — Alnazeer Abdo
+
+> مهندس ذكاء اصطناعي ومطوّر برمجيات يساعد أصحاب المشاريع والشركات في العالم العربي على بناء أنظمة ذكية وأتمتة أعمالهم — من الفكرة حتى التسليم. Software & AI engineer serving the Arab world: AI agents, automation, chatbots, voice agents, websites, mobile apps and custom business systems (CRM/ERP).
+
+## الخدمات — Services
+- [وكلاء الذكاء الاصطناعي](https://alnazeer.me/service-ai-agents): وكيل ذكي يفهم المطلوب وينفذ مهام متعددة عبر أنظمتك.
+- [روبوتات المحادثة الذكية](https://alnazeer.me/service-chatbots): روبوت نصي يخدم عملائك ويحجز ويبيع.
+- [الوكلاء الصوتيون](https://alnazeer.me/service-voice-agents): وكيل صوتي يستقبل مكالماتك ويجريها بشكل طبيعي.
+- [أتمتة العمليات والمهام](https://alnazeer.me/service-automation): أحول مهامك اليدوية المتكررة إلى عمليات آلية.
+- [دمج الذكاء الاصطناعي](https://alnazeer.me/service-ai-integration): أضيف قدرات الذكاء الاصطناعي إلى أنظمتك الحالية.
+- [تخصيص نماذج الذكاء الاصطناعي](https://alnazeer.me/service-model-customization): أخصص سلوك وقدرات النماذج لتناسب مشروعك.
+- [أنظمة الأعمال الذكية](https://alnazeer.me/service-ai-business-systems): نظام عمل يجمع البرمجيات والذكاء الاصطناعي.
+- [حلول ذكاء اصطناعي مخصصة](https://alnazeer.me/custom-ai): حل مصمم لحالة استخدام محددة عندك.
+- [تطوير المواقع](https://alnazeer.me/service-websites): موقع احترافي سريع متجاوب.
+- [المتاجر الإلكترونية](https://alnazeer.me/service-stores): متجر إلكتروني وتجربة شراء مخصصة.
+- [تطبيقات الجوال](https://alnazeer.me/service-apps): تطبيق هاتف لعملك وخدماتك.
+- [أنظمة CRM](https://alnazeer.me/service-crm): بيانات عملائك ومبيعاتك في نظام واحد.
+- [أنظمة ERP](https://alnazeer.me/service-erp): إدارة مواردك وعملياتك من مكان واحد.
+- [أنظمة الشركات](https://alnazeer.me/service-company-systems): برمجيات مخصصة لإدارة عملياتك وموظفيك.
+- [الأنظمة المخصصة](https://alnazeer.me/service-custom-systems): نظام على مقاس عملك حين لا يناسبك الجاهز.
+
+## المشاريع — Selected projects
+- [نظام مضيف](https://alnazeer.me/project-mudif): وكيل ذكاء اصطناعي لمطعم متصل بنظام نقاط البيع (POS)
+- [نظام المدار](https://alnazeer.me/project-almadar): نظام CRM كامل مع مساعد ذكي
+- [سجل برو](https://alnazeer.me/project-sijilpro): دردشة ذكية داخل تطبيق إدارة الأغنام
+- [كل المشاريع](https://alnazeer.me/projects)
+
+## تواصل — Contact
+- واتساب / WhatsApp: https://wa.me/249117148664
+- نموذج التواصل / Contact form: https://alnazeer.me/contact
+- من أنا / About: https://alnazeer.me/about
+- الجلسة الاستكشافية الأولى مجانية — First discovery session is free.

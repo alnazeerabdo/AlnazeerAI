@@ -499,3 +499,6 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
   .chat-pop.ai-chat .ai-log{padding-bottom:18px}
   .chat-pop.ai-chat .ai-input{padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
 }
+
+/* روابط تفاصيل الخدمات داخل البطاقات */
+.svc-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:14px}
