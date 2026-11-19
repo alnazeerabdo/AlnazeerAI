@@ -225,7 +225,7 @@
     navLinks.prepend(dh);
     var dcta = document.createElement('div');
     dcta.className = 'drawer-cta';
-    dcta.innerHTML = '<a href="contact" class="btn btn-primary">اتصل بي</a>';
+    dcta.innerHTML = '<a href="free-session.html" class="btn btn-primary">جلسة مجانية</a>';
     navLinks.appendChild(dcta);
     function sync() {
       var open = navLinks.classList.contains('open');
@@ -503,14 +503,10 @@
       return part
         .replace(/الصفحة\s+الرئيسية/g, 'صفحة index.html')
         .replace(/صفحة\s+(?:الاستشارات|الاستشارة)(?:\s+المجانية)?/g, 'صفحة contact.html')
-        .replace(/صفحة\s+الخدمات/g, 'صفحة services.html')
+        .replace(/صفحة\s+(?:الخدمات|الباقات)/g, 'صفحة packages.html')
         .replace(/صفحة\s+المشاريع/g, 'صفحة projects.html')
         .replace(/صفحة\s+(?:التواصل|الاتصال)/g, 'صفحة contact.html')
-        .replace(/صفحة\s+(?:عن\s+النذير|عني|من\s+أنا)/g, 'صفحة about.html')
-        .replace(/صفحة\s+وكلاء\s+الذكاء\s+الاصطناعي/g, 'صفحة ai-agents.html')
-        .replace(/صفحة\s+(?:الذكاء\s+الاصطناعي\s+المخصص|الحلول\s+المخصصة)/g, 'صفحة custom-ai.html')
-        .replace(/صفحة\s+الذكاء\s+الاصطناعي/g, 'صفحة ai.html')
-        .replace(/صفحة\s+تطوير\s+البرمجيات/g, 'صفحة build.html');
+        .replace(/صفحة\s+(?:عن\s+النذير|عني|من\s+أنا)/g, 'صفحة about.html');
     }
     function pageAlias(s) {
       /* إن كتب النموذج اسم الصفحة بالعربي بدل اسم الملف، نحوّله لاسم الملف
@@ -528,29 +524,9 @@
     var PAGE_TITLES = {
       'index.html': 'الصفحة الرئيسية',
       'about.html': 'عن النذير',
-      'services.html': 'الخدمات',
-      'ai.html': 'خدمات الذكاء الاصطناعي',
-      'build.html': 'تطوير البرمجيات',
-      'ai-agents.html': 'وكلاء الذكاء الاصطناعي',
-      'custom-ai.html': 'حلول الذكاء الاصطناعي المخصصة',
-      'software.html': 'تطوير البرمجيات والأنظمة',
+      'packages.html': 'الباقات',
       'projects.html': 'المشاريع',
       'contact.html': 'اتصل بي',
-      'service-chatbots.html': 'روبوتات المحادثة',
-      'service-voice-agents.html': 'الوكلاء الصوتيون',
-      'service-automation.html': 'أتمتة العمليات',
-      'service-ai-agents.html': 'وكلاء الذكاء الاصطناعي',
-      'service-ai-integration.html': 'دمج الذكاء الاصطناعي',
-      'service-ai-business-systems.html': 'أنظمة الأعمال الذكية',
-      'service-custom-ai-solutions.html': 'حلول الذكاء الاصطناعي المخصصة',
-      'service-model-customization.html': 'تخصيص النماذج',
-      'service-websites.html': 'تطوير المواقع',
-      'service-stores.html': 'المتاجر الإلكترونية',
-      'service-apps.html': 'تطبيقات الجوال',
-      'service-company-systems.html': 'أنظمة الشركات',
-      'service-erp.html': 'ERP',
-      'service-crm.html': 'CRM',
-      'service-custom-systems.html': 'الأنظمة المخصصة',
       'project-mudif.html': 'نظام إدارة المطعم',
       'project-almadar.html': 'المدار CRM',
       'project-sijilpro.html': 'سجل برو',
@@ -567,9 +543,8 @@
       return (name === 'index.html' ? '' : 'صفحة ') + pageTitle(name) + ' هنا';
     }
     function pageHref(name) {
-      /* روابط نظيفة بلا .html — الصفحة الرئيسية بلا اسمها */
-      var slug = name.replace(/\.html$/i, '');
-      return slug === 'index' ? 'https://alnazeer.me/' : 'https://alnazeer.me/' + slug;
+      /* روابط باسم الملف الحقيقي لتعمل محلياً وعلى أي استضافة ثابتة */
+      return name === 'index.html' ? 'https://alnazeer.me/' : 'https://alnazeer.me/' + name;
     }
     function pageLink(name) {
       /* رابط مطلق على النطاق المخصص حتى يعمل حتى لو فُتح الموقع من رابط github.io أو خارج الموقع. */
@@ -579,8 +554,8 @@
       var e = esc(cleanModelText(s));
       // 1) روابط الموقع القديمة (github.io) -> النطاق المخصص
       e = e.replace(/https?:\/\/(?:www\.)?alnazeerabdo\.github\.io\/(?:alnazeerdev|alnazeerai)\/?/gi, 'https://alnazeer.me/');
-      // 1.5) صفحات ملغاة -> صفحة الاتصال
-      e = e.replace(/free-session\.html/gi, 'contact.html');
+      // 1.5) الصفحات القديمة (الخدمات وصفحاتها) -> صفحة الباقات
+      e = e.replace(/(?:free-session|faq|services|ai|build|ai-agents|custom-ai|software|service-[a-z0-9-]+)\.html/gi, 'packages.html');
       // 2) أسماء الصفحات العربية -> اسم الملف
       e = pageAlias(e);
       // 3) استخرج الروابط أولاً (بـ placeholder) حتى لا تُمسّ أرقام الواتساب داخل الـ href
@@ -608,7 +583,7 @@
         return '<a class="' + cls + '" href="' + (isPage ? pageHref(pageName) : safe) + '" target="_blank" rel="noopener">' + label + '</a>';
       });
       // 6) أسماء الصفحات — نبتلع «صفحة» التي قبل اسم الملف حتى لا تتكرر داخل الرابط
-      e = e.replace(/(^|[\s>(])(?:صفحة\s+)?((?:free-session|services|contact|projects|about|ai-agents|custom-ai|software|ai|build|index|service-[a-z0-9-]+|project-[a-z0-9-]+)\.html)\b/gi,
+      e = e.replace(/(^|[\s>(])(?:صفحة\s+)?((?:packages|contact|projects|about|index|project-[a-z0-9-]+)\.html)\b/gi,
         function (_, pre, name) { return pre + pageLink(name.toLowerCase()); });
       // 7) إزالة «هنا» أو «من هنا» المكررة بعد أن صار اسم الصفحة داخل الرابط ينتهي بـ «هنا»
       e = e.replace(/(<a class="page-link"[^>]*>[^<]*هنا<\/a>)\s+(?:من\s+)?هنا/g, '$1');
@@ -720,10 +695,10 @@
         log.scrollTop = log.scrollHeight;
         return;
       }
-      add('bot', 'أهلاً بك، أنا مساعد الذكاء الاصطناعي الخاص بالنذير، يمكنني مساعدتك في كل ما تحتاج معرفته عن الخدمات والأسعار والتواصل مع النذير.');
+      add('bot', 'أهلاً بك، أنا مساعد الذكاء الاصطناعي الخاص بالنذير، يمكنني مساعدتك في كل ما تحتاج معرفته عن الباقات والأسعار والتواصل مع النذير.');
     }
     function offline() {
-      add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="contact">إرسال طلبك</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
+      add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="contact.html">إرسال طلبك</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
     }
     /* لا كابتشا: الحماية عبر حدود KV + فلتر حقن + قفل النطاق في الخادم. */
     function send(q) {
@@ -760,7 +735,7 @@
           typeMessage(tp, t, function () { busy = false; });
         })
         .catch(function () {
-          typeMessage(tp, 'تعذر الاتصال. يمكنك الحجز من صفحة الاستشارة المجانية أو مراسلتي واتساب.', function () { busy = false; });
+          typeMessage(tp, 'تعذر الاتصال. يمكنك حجز جلسة مجانية من صفحة contact.html أو مراسلتي واتساب.', function () { busy = false; });
         });
     }
     if (form) form.addEventListener('submit', function (e) {
@@ -812,11 +787,7 @@
   })();
 
   /* ===== Contact button nudge =====
-     بعد 10 ثوانٍ من دخول الزائر نعرض تلميحاً صغيراً بجانب زر التواصل.
-     إغلاقه (بالزر أو بالضغط في أي مكان) يُسجَّل في localStorage، ولا يعود
-     لدقيقتين حتى لو حدّث الزائر الصفحة.
-     زر المساعد الذكي مخفي حالياً من CSS، لذا يظهر التلميح بجانب زر الواتساب؛
-     عند إعادة إظهار زر المساعد يعود التلميح إليه تلقائياً بنفس القواعد. */
+     زر المساعد مخفي حالياً، فيظهر التلميح بجانب زر الواتساب. */
   (function () {
     var aiHidden = !chatFab || getComputedStyle(chatFab).display === 'none';
     var target = aiHidden ? document.querySelector('.wa-fab') : chatFab;
@@ -828,9 +799,7 @@
     tip.setAttribute('role', 'status');
     var tipText = document.createElement('span');
     tipText.className = 'ai-tip-text';
-    tipText.textContent = aiHidden
-      ? 'عندك استفسار؟ راسلني على واتساب وأرد عليك بنفسي'
-      : 'تحتاج مساعدة؟ المساعد الذكي يرد عليك فوراً';
+    tipText.textContent = aiHidden ? 'عندك استفسار؟ راسلني على واتساب وأرد عليك بنفسي' : 'تحتاج مساعدة؟ المساعد الذكي يرد عليك فوراً';
     var tipX = document.createElement('button');
     tipX.className = 'ai-tip-x';
     tipX.type = 'button';
