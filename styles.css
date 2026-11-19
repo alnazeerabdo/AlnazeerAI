@@ -741,3 +741,17 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 .chat-fab{display:none}
 .wa-fab{bottom:18px}
 .svc-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:14px}
+
+/* Project-card labels only: black outline + light 3D lift */
+.card .tag{
+  display:inline-block;
+  border:2px solid var(--line)!important;
+  box-shadow:var(--extrude)!important;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease);
+}
+.card .tag:hover{
+  transform:translate(-1px,-3px) rotateX(6deg) rotateY(-4deg);
+  box-shadow:var(--extrude-lg)!important;
+  will-change:transform;
+}
+@media(prefers-reduced-motion:reduce){.card .tag:hover{transform:none}}
