@@ -225,7 +225,7 @@
     navLinks.prepend(dh);
     var dcta = document.createElement('div');
     dcta.className = 'drawer-cta';
-    dcta.innerHTML = '<a href="free-session.html" class="btn btn-primary">جلسة مجانية</a>';
+    dcta.innerHTML = '<a href="contact" class="btn btn-primary">اتصل بي</a>';
     navLinks.appendChild(dcta);
     function sync() {
       var open = navLinks.classList.contains('open');
@@ -544,7 +544,8 @@
     }
     function pageHref(name) {
       /* روابط باسم الملف الحقيقي لتعمل محلياً وعلى أي استضافة ثابتة */
-      return name === 'index.html' ? 'https://alnazeer.me/' : 'https://alnazeer.me/' + name;
+      var slug = name.replace(/\.html$/i, '');
+      return slug === 'index' ? 'https://alnazeer.me/' : 'https://alnazeer.me/' + slug;
     }
     function pageLink(name) {
       /* رابط مطلق على النطاق المخصص حتى يعمل حتى لو فُتح الموقع من رابط github.io أو خارج الموقع. */
@@ -698,7 +699,7 @@
       add('bot', 'أهلاً بك، أنا مساعد الذكاء الاصطناعي الخاص بالنذير، يمكنني مساعدتك في كل ما تحتاج معرفته عن الباقات والأسعار والتواصل مع النذير.');
     }
     function offline() {
-      add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="contact.html">إرسال طلبك</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
+      add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="contact">إرسال طلبك</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');
     }
     /* لا كابتشا: الحماية عبر حدود KV + فلتر حقن + قفل النطاق في الخادم. */
     function send(q) {
