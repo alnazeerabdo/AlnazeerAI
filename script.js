@@ -21,6 +21,28 @@
     }
   };
 
+  // Local preview (double-clicking index.html): clean URLs have no real file on
+  // file://. Add the .html extension only for local files; the hosted site keeps
+  // its clean URLs and canonical tags exactly as they are.
+  if (location.protocol === 'file:') {
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a || a.classList.contains('drop-toggle')) return;
+      var raw = a.getAttribute('href') || '';
+      if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(raw)) return;
+      var parts = raw.match(/^([^?#]*)([?#].*)?$/);
+      var url = parts[1] || '';
+      var tail = parts[2] || '';
+      if (/\.(?:html?|css|js|json|xml|txt|png|jpe?g|webp|gif|svg|ico|pdf)$/i.test(url)) return;
+      if (url === './' || url === '.' || url === '') url = 'index.html';
+      else if (url.indexOf('./') === 0) url = url.slice(2) || 'index.html';
+      else if (url.charAt(0) === '/') return;
+      if (url.indexOf('.html') === -1) url += '.html';
+      e.preventDefault();
+      location.href = url + tail;
+    });
+  }
+
   // Mobile menu
   var menuBtn = document.getElementById('menuBtn');
   var navLinks = document.getElementById('navLinks');
@@ -30,12 +52,29 @@
       menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
     navLinks.addEventListener('click', function (e) {
-      if (e.target.closest('a')) {
+      if (e.target.closest('a') && !e.target.closest('.drop-toggle')) {
         navLinks.classList.remove('open');
         menuBtn.setAttribute('aria-expanded', 'false');
       }
     });
   }
+
+  // Services dropdown (click + keyboard, works on desktop and in the mobile drawer)
+  document.querySelectorAll('.drop-toggle').forEach(function (toggle) {
+    var wrap = toggle.closest('.dropdown');
+    if (!wrap) return;
+    toggle.addEventListener('click', function (e) {
+      e.preventDefault();
+      var open = wrap.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (!wrap.contains(e.target)) {
+        wrap.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
 
   // Active nav
   try {
@@ -106,6 +145,23 @@
   });
 
   // Booking form -> Google Form (or fallback)
+  // Preselect the service when the visitor arrives from a service-page CTA
+  (function () {
+    var sel = document.getElementById('service');
+    if (!sel) return;
+    var map = {
+      'digital-presence': 'الحضور الرقمي',
+      'technical-partner': 'الشريك التقني',
+      'smart-employee': 'الموظف الذكي',
+      'business-management': 'إدارة أعمالك',
+      'custom': 'حل مخصص / لم أجد ما أحتاجه'
+    };
+    try {
+      var key = new URLSearchParams(location.search).get('service');
+      if (key && map[key]) sel.value = map[key];
+    } catch (e) {}
+  })();
+
   var booking = document.getElementById('bookingForm');
   if (booking) {
     booking.addEventListener('submit', function (e) {
@@ -114,6 +170,8 @@
       var phone = (document.getElementById('phone') || {}).value || '';
       var email = (document.getElementById('email') || {}).value || '';
       var problem = (document.getElementById('problem') || {}).value || '';
+      var serviceEl = document.getElementById('service');
+      var service = serviceEl ? serviceEl.value.trim() : '';
       var sizeEl = document.getElementById('workSize');
       var size = sizeEl ? sizeEl.value.trim() : '';
       var noteEl = document.getElementById('bookingNote');
@@ -175,7 +233,7 @@
         fd.append(GOOGLE_FORM_CONFIG.fields.phone, phone);
         fd.append(GOOGLE_FORM_CONFIG.fields.email, email);
         fd.append(GOOGLE_FORM_CONFIG.fields.work, '');
-        fd.append(GOOGLE_FORM_CONFIG.fields.problem, problem);
+        fd.append(GOOGLE_FORM_CONFIG.fields.problem, (service ? 'الخدمة المطلوبة: ' + service + '\n\n' : '') + problem);
         fd.append(GOOGLE_FORM_CONFIG.fields.size, size);
         fetch(GOOGLE_FORM_CONFIG.actionUrl, { method: 'POST', mode: 'no-cors', body: fd })
           .then(function () {
@@ -503,7 +561,7 @@
       return part
         .replace(/الصفحة\s+الرئيسية/g, 'صفحة index.html')
         .replace(/صفحة\s+(?:الاستشارات|الاستشارة)(?:\s+المجانية)?/g, 'صفحة contact.html')
-        .replace(/صفحة\s+(?:الخدمات|الباقات)/g, 'صفحة packages.html')
+        .replace(/صفحة\s+(?:الخدمات|الباقات)/g, 'صفحة index.html')
         .replace(/صفحة\s+المشاريع/g, 'صفحة projects.html')
         .replace(/صفحة\s+(?:التواصل|الاتصال)/g, 'صفحة contact.html')
         .replace(/صفحة\s+(?:عن\s+النذير|عني|من\s+أنا)/g, 'صفحة about.html');
@@ -524,10 +582,13 @@
     var PAGE_TITLES = {
       'index.html': 'الصفحة الرئيسية',
       'about.html': 'عن النذير',
-      'packages.html': 'الباقات',
+      'digital-presence.html': 'الحضور الرقمي',
+      'technical-partner.html': 'الشريك التقني',
+      'smart-employee.html': 'الموظف الذكي',
+      'business-management.html': 'إدارة أعمالك',
       'projects.html': 'المشاريع',
       'contact.html': 'اتصل بي',
-      'project-mudif.html': 'نظام إدارة المطعم',
+      'project-mudif.html': 'نظام مضيف',
       'project-almadar.html': 'المدار CRM',
       'project-sijilpro.html': 'سجل برو',
       'project-spectrababy.html': 'متجر سبكترا',
@@ -555,8 +616,11 @@
       var e = esc(cleanModelText(s));
       // 1) روابط الموقع القديمة (github.io) -> النطاق المخصص
       e = e.replace(/https?:\/\/(?:www\.)?alnazeerabdo\.github\.io\/(?:alnazeerdev|alnazeerai)\/?/gi, 'https://alnazeer.me/');
-      // 1.5) الصفحات القديمة (الخدمات وصفحاتها) -> صفحة الباقات
-      e = e.replace(/(?:free-session|faq|services|ai|build|ai-agents|custom-ai|software|service-[a-z0-9-]+)\.html/gi, 'packages.html');
+      // 1.5) الصفحات القديمة (الباقات وصفحات الخدمات القديمة) -> الصفحات الجديدة
+      e = e.replace(/(?:websites|stores|apps|service-websites|service-stores|service-apps|service-model-customization)\.html/gi, 'digital-presence.html');
+      e = e.replace(/(?:ai-agents|chatbots|service-ai-agents|service-chatbots|service-voice-agents|service-automation|service-ai-integration|service-ai-business-systems)\.html/gi, 'smart-employee.html');
+      e = e.replace(/(?:crm|erp|company-systems|service-crm|service-erp|service-company-systems|service-custom-systems)\.html/gi, 'business-management.html');
+      e = e.replace(/(?:free-session|faq|services|ai|build|custom-ai|software|service-custom-ai-solutions)\.html/gi, 'index.html');
       // 2) أسماء الصفحات العربية -> اسم الملف
       e = pageAlias(e);
       // 3) استخرج الروابط أولاً (بـ placeholder) حتى لا تُمسّ أرقام الواتساب داخل الـ href
@@ -584,7 +648,7 @@
         return '<a class="' + cls + '" href="' + (isPage ? pageHref(pageName) : safe) + '" target="_blank" rel="noopener">' + label + '</a>';
       });
       // 6) أسماء الصفحات — نبتلع «صفحة» التي قبل اسم الملف حتى لا تتكرر داخل الرابط
-      e = e.replace(/(^|[\s>(])(?:صفحة\s+)?((?:packages|contact|projects|about|index|project-[a-z0-9-]+)\.html)\b/gi,
+      e = e.replace(/(^|[\s>(])(?:صفحة\s+)?((?:digital-presence|technical-partner|smart-employee|business-management|contact|projects|about|index|project-[a-z0-9-]+)\.html)\b/gi,
         function (_, pre, name) { return pre + pageLink(name.toLowerCase()); });
       // 7) إزالة «هنا» أو «من هنا» المكررة بعد أن صار اسم الصفحة داخل الرابط ينتهي بـ «هنا»
       e = e.replace(/(<a class="page-link"[^>]*>[^<]*هنا<\/a>)\s+(?:من\s+)?هنا/g, '$1');
@@ -696,7 +760,7 @@
         log.scrollTop = log.scrollHeight;
         return;
       }
-      add('bot', 'أهلاً بك، أنا مساعد الذكاء الاصطناعي الخاص بالنذير، يمكنني مساعدتك في كل ما تحتاج معرفته عن الباقات والأسعار والتواصل مع النذير.');
+      add('bot', 'أهلاً بك، أنا مساعد الذكاء الاصطناعي الخاص بالنذير، يمكنني مساعدتك في معرفة الخدمات الأربع: الحضور الرقمي، الشريك التقني، الموظف الذكي وإدارة أعمالك، وكيفية التواصل معي.');
     }
     function offline() {
       add('bot', 'المساعد الذكي سيعمل هنا قريباً. الآن يمكنك <a href="contact">إرسال طلبك</a> أو مراسلتي واتساب من الزر أعلى المحادثة.');

@@ -1,42 +1,120 @@
 # alnazeer.me — robots.txt
 User-agent: *
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 # مرحباً بزواحف الذكاء الاصطناعي — AI crawlers are welcome
 User-agent: GPTBot
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 User-agent: OAI-SearchBot
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 User-agent: Claude-User
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 User-agent: Perplexity-User
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 User-agent: Google-Extended
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 User-agent: Applebot-Extended
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 User-agent: CCBot
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 User-agent: meta-externalagent
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 User-agent: Amazonbot
 Allow: /
+Disallow: /worker/
+Disallow: /appscript/
+Disallow: /ARCHITECTURE.md
+Disallow: /architecture-diagrams.html
+Disallow: /proposed-chat-fix
+Disallow: /.clasp.json
 
 Sitemap: https://alnazeer.me/sitemap.xml
