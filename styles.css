@@ -334,7 +334,10 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
   .menu-btn{display:grid;place-items:center}
   .footer-grid{grid-template-columns:1fr 1fr;justify-items:center}
   .footer{text-align:center}
-  .footer .logo{justify-content:center}
+  .footer-grid>div{width:100%;text-align:center}
+  .footer-grid a.logo{display:flex;justify-content:center;margin-inline:auto}
+  .footer-grid a.logo img{margin-inline:auto}
+  .footer .f-muted{text-align:center}
 }
 @media(max-width:600px){
   .cards-3{grid-template-columns:1fr}
@@ -504,7 +507,10 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
 @media(max-width:600px){
   .footer-grid{grid-template-columns:1fr;justify-items:center}
   .footer{text-align:center}
-  .footer .logo{justify-content:center}
+  .footer-grid>div{width:100%;text-align:center}
+  .footer-grid a.logo{display:flex;justify-content:center;margin-inline:auto}
+  .footer-grid a.logo img{margin-inline:auto}
+  .footer .f-muted{text-align:center}
   .footer .btn{margin-inline:auto}
   .footer .btn{font-size:12.5px;padding:10px 14px}
   .logo-img{height:30px;max-width:120px}
