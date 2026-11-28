@@ -332,7 +332,9 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
   .drawer-cta{display:block;margin:auto 12px 0;padding:14px 6px 6px}
   .drawer-cta .btn{width:100%}
   .menu-btn{display:grid;place-items:center}
-  .footer-grid{grid-template-columns:1fr 1fr}
+  .footer-grid{grid-template-columns:1fr 1fr;justify-items:center}
+  .footer{text-align:center}
+  .footer .logo{justify-content:center}
 }
 @media(max-width:600px){
   .cards-3{grid-template-columns:1fr}
@@ -500,7 +502,10 @@ section{content-visibility:auto;contain-intrinsic-size:auto 600px}
   .drawer-close{background:var(--gold);border-color:var(--gold);color:var(--black);width:42px;height:42px;font-size:22px}
 }
 @media(max-width:600px){
-  .footer-grid{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr;justify-items:center}
+  .footer{text-align:center}
+  .footer .logo{justify-content:center}
+  .footer .btn{margin-inline:auto}
   .footer .btn{font-size:12.5px;padding:10px 14px}
   .logo-img{height:30px;max-width:120px}
   .nav-actions{gap:6px}

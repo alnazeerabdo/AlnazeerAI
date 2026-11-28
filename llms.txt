@@ -1,16 +1,16 @@
-# النذير — Alnazeer Abdo
+# النذير، Alnazeer Abdo
 
-> مهندس ذكاء اصطناعي ومطوّر برمجيات يساعد أصحاب المشاريع والشركات في العالم العربي على بناء حضور رقمي وأنظمة ذكية وأتمتة أعمالهم — من الفكرة حتى التسليم. Software & AI engineer serving the Arab world: digital presence, technical partnership, custom AI employees and business systems.
+> مهندس ذكاء اصطناعي ومطوّر برمجيات يساعد أصحاب المشاريع والشركات في العالم العربي على بناء حضور رقمي وأنظمة ذكية وأتمتة أعمالهم، من الفكرة حتى التسليم. Software & AI engineer serving the Arab world: digital presence, technical partnership, custom AI employees and business systems.
 
-## الخدمات — Services
+## الخدمات، Services
 - [الحضور الرقمي](https://alnazeer.me/digital-presence): صفحة هبوط أو موقع أو متجر إلكتروني أو تطبيق جوال، مصمّم بعد فهم النشاط والعملاء والسوق والمنافسين، بكود قابل للتوسّع وحماية بيانات ونسخ احتياطي واستضافة مناسبة.
-- [الشريك التقني](https://alnazeer.me/technical-partner): الذراع التقنية للوكالات وفرق التسويق وأصحاب المشاريع — مواقع وتطبيقات وأتمتة ووكلاء ذكاء اصطناعي ومسارات تسويق، تنفيذ كامل عن بُعد مع دعم متفق عليه.
-- [الموظف الذكي](https://alnazeer.me/smart-employee): نظام ذكاء اصطناعي مخصص لكل عمل — ردود كتابية وصوتية، حجوزات وتذكيرات، تقارير تصلك على واتساب، لوحة تجمع بياناتك، ومستشار ذكي يسأل عن أرقامك ومع كل رقم مصدره. يُبنى على مقاس العمل تدريجياً.
-- [إدارة أعمالك](https://alnazeer.me/business-management): استبدال الورقة والإكسل بلوحات ومتابعة — تخصيص CRM أو ERP جاهز، أو بناء نظام من الصفر، مع نقل البيانات والصلاحيات والتقارير.
+- [الشريك التقني](https://alnazeer.me/technical-partner): الذراع التقنية للوكالات وفرق التسويق وأصحاب المشاريع، مواقع وتطبيقات وأتمتة ووكلاء ذكاء اصطناعي ومسارات تسويق، تنفيذ كامل عن بُعد مع دعم متفق عليه.
+- [الموظف الذكي](https://alnazeer.me/smart-employee): نظام ذكاء اصطناعي مخصص لكل عمل، ردود كتابية وصوتية، حجوزات وتذكيرات، تقارير تصلك على واتساب، لوحة تجمع بياناتك، ومستشار ذكي يسأل عن أرقامك ومع كل رقم مصدره. يُبنى على مقاس العمل تدريجياً.
+- [إدارة أعمالك](https://alnazeer.me/business-management): استبدال الورقة والإكسل بلوحات ومتابعة، تخصيص CRM أو ERP جاهز، أو بناء نظام من الصفر، مع نقل البيانات والصلاحيات والتقارير.
 - [حل مخصص](https://alnazeer.me/contact?service=custom): إن لم تجد ما تحتاجه، نبدأ بجلسة نفهم فيها عملك ثم نختار حلاً جاهزاً مناسباً أو نبني لك حلاً مخصصاً.
 - [جلسة مجانية](https://alnazeer.me/contact): ابدأ بجلسة مجانية نحدد فيها الأنسب لك.
 
-## المشاريع — Selected projects
+## المشاريع، Selected projects
 - [نظام مضيف](https://alnazeer.me/project-mudif): وكيل ذكاء اصطناعي لمطعم متصل بنظام نقاط البيع (POS)
 - [نظام المدار](https://alnazeer.me/project-almadar): نظام CRM كامل مع مساعد ذكي
 - [سجل برو](https://alnazeer.me/project-sijilpro): دردشة ذكية داخل تطبيق إدارة الأغنام
@@ -18,9 +18,9 @@
 - [رولفا](https://alnazeer.me/project-rulva): موقع مكتب محاماة بالعربية والإنجليزية
 - [كل المشاريع](https://alnazeer.me/projects)
 
-## تواصل — Contact
+## تواصل، Contact
 - واتساب / WhatsApp: https://wa.me/249117148664
 - نموذج التواصل / Contact form: https://alnazeer.me/contact
 - من أنا / About: https://alnazeer.me/about
-- أعمل عن بُعد — Remote, serving clients across the Arab world. الدعم لفترة نتفق عليها بعد التسليم.
-- الجلسة الأولى مجانية — First session is free. الأسعار تُحدد بعد فهم نطاق العمل.
+- أعمل عن بُعد، Remote, serving clients across the Arab world. الدعم لفترة نتفق عليها بعد التسليم.
+- الجلسة الأولى مجانية، First session is free. الأسعار تُحدد بعد فهم نطاق العمل.
